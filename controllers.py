@@ -1,13 +1,44 @@
+from tabnanny import verbose
+
 from langchain.agents import create_agent
-from langchain_core.output_parsers import StrOutputParser
 
 from models import groq_model
+from prompts import agent_prompt
+from tools import Tools
+
+
+async def stream_user_query(query: str):
+    async for mode, chunk in agent.astream(
+        {"messages": [{"role": "user", "content": query}]},
+        stream_mode=["updates", "messages"],
+    ):
+        if mode == "messages":
+            message_chunk, metadata = chunk
+
+            content = message_chunk.content
+
+            if content:
+                if isinstance(content, str):
+                    yield f"data: {json.dumps({'type': 'token', 'content': content})}\n\n"
+                elif isinstance(content, list):
+                    for block in content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            yield f"data: {json.dumps({'type': 'token', 'content': block['text']})}\n\n"
+
+        elif mode == "updates":
+            for node, update in chunk.items():
+                if node != "model":
+                    yield f"data: {json.dumps({'type': 'status', 'content': node})}\n\n"
+
+    yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
 
 def process_user_query(query: str):
-    chat_history = []
-
-    op_parser = StrOutputParser()
-    response_chain = groq_model | op_parser
-    response = response_chain.invoke(query)
-    return response
+    return StreamingResponse(
+        stream_user_query(query),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )

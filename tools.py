@@ -9,6 +9,7 @@ load_dotenv()
 
 @tool
 def search_tool(query: str) -> list:
+    """Takes a search query as string and returns top 3 results as a list"""
     tav_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
     response = tav_client.search(query)
 
@@ -28,3 +29,6 @@ def search_tool(query: str) -> list:
         )
 
     return relevant_results
+
+
+Tools = [search_tool]

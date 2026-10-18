@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from classes import Query
 from controllers import process_user_query
 
 app = FastAPI()
@@ -11,5 +12,5 @@ def default():
 
 
 @app.post("/query")
-def processQuery(query: str):
-    return process_user_query(query)
+def processQuery(request: Query):
+    return process_user_query(request.query)
