@@ -1,0 +1,107 @@
+/* Neo-Brutalism Pure CSS Utility classes so the app has high fidelity without heavy external CSS packages */
+
+.neo-box {
+  border: 3px solid #0d0d0d;
+  box-shadow: 4px 4px 0px #0d0d0d;
+  background-color: #ffffff;
+}
+
+.neo-box-lg {
+  border: 3px solid #0d0d0d;
+  box-shadow: 6px 6px 0px #0d0d0d;
+  background-color: #ffffff;
+}
+
+.neo-box-xl {
+  border: 4px solid #0d0d0d;
+  box-shadow: 8px 8px 0px #0d0d0d;
+  background-color: #ffffff;
+}
+
+.neo-box-flat {
+  border: 3px solid #0d0d0d;
+  background-color: #ffffff;
+}
+
+.neo-btn {
+  border: 3px solid #0d0d0d;
+  box-shadow: 4px 4px 0px #0d0d0d;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: transform 70ms ease, box-shadow 70ms ease;
+  user-select: none;
+}
+
+.neo-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #0d0d0d;
+}
+
+.neo-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #0d0d0d;
+}
+
+.neo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 2px 2px 0px #0d0d0d;
+}
+
+.neo-badge {
+  border: 2px solid #0d0d0d;
+  box-shadow: 2px 2px 0px #0d0d0d;
+  font-weight: 900;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.neo-input {
+  border: 3px solid #0d0d0d;
+  box-shadow: inset 2px 2px 0px rgba(0,0,0,0.15), 4px 4px 0px #0d0d0d;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.8rem 1rem;
+  outline: none;
+  background: #ffffff;
+  width: 100%;
+}
+
+.neo-input:focus {
+  background-color: #fffae0;
+  border-color: #0d0d0d;
+  box-shadow: 4px 4px 0px #00f0ff, 6px 6px 0px #0d0d0d;
+}
+
+/* Colors */
+.bg-neo-yellow { background-color: #ffee00 !important; color: #0d0d0d; }
+.bg-neo-pink   { background-color: #ff5277 !important; color: #ffffff; }
+.bg-neo-cyan   { background-color: #00f0ff !important; color: #0d0d0d; }
+.bg-neo-lime   { background-color: #10e060 !important; color: #0d0d0d; }
+.bg-neo-purple { background-color: #a45bf1 !important; color: #ffffff; }
+.bg-neo-orange { background-color: #ff7a00 !important; color: #ffffff; }
+.bg-neo-dark   { background-color: #121212 !important; color: #f5f5f5; }
+.bg-neo-terminal { background-color: #0d0d0d !important; color: #00ff66; }
+
+/* Flex/Grid utilities */
+.flex-row { display: flex; flex-direction: row; }
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }

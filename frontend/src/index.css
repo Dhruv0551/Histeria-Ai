@@ -1,0 +1,181 @@
+:root {
+  --bg-main: #fbf7ee;
+  --bg-dots: #dfd7c5;
+  --black: #0d0d0d;
+  --white: #ffffff;
+  --yellow: #ffee00;
+  --pink: #ff5277;
+  --cyan: #00f0ff;
+  --lime: #10e060;
+  --purple: #9b51e0;
+  --orange: #ff7a00;
+  --muted: #66645e;
+  --gray-border: #0d0d0d;
+
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-hard: 4px 4px 0px #0d0d0d;
+  --shadow-hard-lg: 6px 6px 0px #0d0d0d;
+  --shadow-hard-xl: 9px 9px 0px #0d0d0d;
+  --shadow-hard-sm: 2px 2px 0px #0d0d0d;
+  --shadow-pressed: 1px 1px 0px #0d0d0d;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-display);
+  background-color: var(--bg-main);
+  background-image: radial-gradient(var(--bg-dots) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  color: var(--black);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars in Neo-Brutalism style */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1ede2;
+  border-left: 2px solid var(--black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--yellow);
+  border: 2px solid var(--black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pink);
+}
+
+/* Selection */
+::selection {
+  background: var(--cyan);
+  color: var(--black);
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Pulse badge */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.9); }
+}
+
+.pulse-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--lime);
+  border: 1.5px solid var(--black);
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+/* Markdown styling inside chat messages */
+.rendered-markdown p {
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
+.rendered-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.rendered-markdown h1,
+.rendered-markdown h2,
+.rendered-markdown h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.rendered-markdown ul,
+.rendered-markdown ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.rendered-markdown li {
+  margin-bottom: 0.3rem;
+}
+
+.rendered-markdown code {
+  font-family: var(--font-mono);
+  background: #f7f3e8;
+  border: 1.5px solid var(--black);
+  padding: 2px 6px;
+  font-size: 0.88em;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+.rendered-markdown pre {
+  background: var(--black);
+  color: #00ff66;
+  border: 3px solid var(--black);
+  box-shadow: 4px 4px 0px var(--black);
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.8rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.rendered-markdown pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  box-shadow: none;
+}
+
+.rendered-markdown a {
+  color: var(--black);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  background: var(--yellow);
+  padding: 0 4px;
+}
+
+.rendered-markdown a:hover {
+  background: var(--pink);
+  color: var(--white);
+}
+
+.rendered-markdown blockquote {
+  border-left: 5px solid var(--black);
+  padding-left: 1rem;
+  margin: 0.8rem 0;
+  background: #fbf1b3;
+  padding-block: 0.4rem;
+}
