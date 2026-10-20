@@ -2,7 +2,6 @@ import json
 
 from fastapi.responses import StreamingResponse
 from langchain.agents import create_agent
-
 from models import groq_model
 from prompts import agent_prompt
 from tools import Tools
@@ -22,11 +21,9 @@ async def stream_user_query(query: str):
         if mode == "messages":
             message_chunk, metadata = chunk
 
-            # Ignore non-model messages
             if metadata.get("langgraph_node") != "model":
                 continue
 
-            # Ignore tool-call chunks
             if getattr(message_chunk, "tool_calls", None):
                 continue
 
