@@ -2,29 +2,37 @@ import json
 
 from fastapi.responses import StreamingResponse
 from langchain.agents import create_agent
+from langgraph.checkpoint.memory import InMemorySaver
 from models import groq_model
 from prompts import agent_prompt
 from tools import Tools
 
+checkpointer = InMemorySaver()
+
+
 agent = create_agent(
-    model=groq_model,
-    system_prompt=agent_prompt,
-    tools=Tools,
+    model=groq_model, system_prompt=agent_prompt, tools=Tools, checkpointer=checkpointer
 )
 
 
-async def stream_user_query(query: str):
+import json
+
+from fastapi.responses import StreamingResponse
+from langchain.messages import HumanMessage
+
+
+async def stream_user_query(query: str, thread_id: str):
+    config = {"configurable": {"thread_id": thread_id}}
+
     async for mode, chunk in agent.astream(
-        {"messages": [{"role": "user", "content": query}]},
+        {"messages": [HumanMessage(content=query)]},
+        config=config,
         stream_mode=["updates", "messages"],
     ):
         if mode == "messages":
             message_chunk, metadata = chunk
 
             if metadata.get("langgraph_node") != "model":
-                continue
-
-            if getattr(message_chunk, "tool_calls", None):
                 continue
 
             content = message_chunk.content
@@ -34,9 +42,15 @@ async def stream_user_query(query: str):
 
             elif isinstance(content, list):
                 for block in content:
-                    if isinstance(block, dict) and block.get("type") == "text":
+                    if (
+                        isinstance(block, dict)
+                        and block.get("type") == "text"
+                        and block.get("text")
+                    ):
                         yield (
-                            f"data: {json.dumps({'type': 'token', 'content': block['text']})}\n\n"
+                            f"data: {
+                                json.dumps({'type': 'token', 'content': block['text']})
+                            }\n\n"
                         )
 
         elif mode == "updates":
@@ -49,9 +63,9 @@ async def stream_user_query(query: str):
     yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
 
-def process_user_query(query: str):
+def process_user_query(query: str, thread_id: str):
     return StreamingResponse(
-        stream_user_query(query),
+        stream_user_query(query, thread_id),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

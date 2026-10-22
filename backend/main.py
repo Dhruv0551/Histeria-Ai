@@ -1,8 +1,6 @@
-from fastapi import FastAPI
-
 from classes import Query
 from controllers import process_user_query
-
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -23,4 +21,5 @@ def default():
 
 @app.post("/query")
 def processQuery(request: Query):
-    return process_user_query(request.query)
+    thread_id = "Convo-Memory 1"
+    return process_user_query(request.query, thread_id)
