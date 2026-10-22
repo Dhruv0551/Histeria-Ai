@@ -28,11 +28,12 @@ export async function checkBackendHealth() {
  * @param {string} query
  * @param {object} callbacks
  * @param {function} callbacks.onToken
+ * @param {function} callbacks.onResult
  * @param {function} callbacks.onStatus
  * @param {function} callbacks.onDone
  * @param {function} callbacks.onError
  */
-export async function streamAgentQuery(query, { onToken, onStatus, onDone, onError }) {
+export async function streamAgentQuery(query, { onToken, onResult, onStatus, onDone, onError }) {
   try {
     const response = await fetch(`${API_BASE_URL}/query`, {
       method: 'POST',
@@ -70,8 +71,12 @@ export async function streamAgentQuery(query, { onToken, onStatus, onDone, onErr
             const parsed = JSON.parse(jsonStr);
             if (parsed.type === 'token') {
               onToken?.(parsed.content);
+            } else if (parsed.type === 'result') {
+              onResult?.(parsed.content);
             } else if (parsed.type === 'status') {
               onStatus?.(parsed.content);
+            } else if (parsed.type === 'error') {
+              onError?.(parsed.content);
             } else if (parsed.type === 'done') {
               onDone?.();
             }
@@ -88,6 +93,9 @@ export async function streamAgentQuery(query, { onToken, onStatus, onDone, onErr
       try {
         const parsed = JSON.parse(jsonStr);
         if (parsed.type === 'token') onToken?.(parsed.content);
+        if (parsed.type === 'result') onResult?.(parsed.content);
+        if (parsed.type === 'status') onStatus?.(parsed.content);
+        if (parsed.type === 'error') onError?.(parsed.content);
         if (parsed.type === 'done') onDone?.();
       } catch (e) {
         // ignore

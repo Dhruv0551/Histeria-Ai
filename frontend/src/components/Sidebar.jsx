@@ -62,7 +62,6 @@ export function Sidebar({ backendOnline, messageCount, onSelectPrompt }) {
             gap: '0.3rem',
           }}
         >
-          <div>ENGINE: GROQ // GPT-OSS-20B</div>
           <div>GRAPH: LANGCHAIN AGENTS</div>
           <div>SEARCH: TAVILY INTELLIGENCE</div>
           <div>SSE: TEXT/EVENT-STREAM</div>

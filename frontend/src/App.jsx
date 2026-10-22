@@ -13,7 +13,7 @@ export default function App() {
     {
       id: 'welcome-1',
       role: 'assistant',
-      content: `⚡ **SYSTEM BOOT SEQUENCE COMPLETE.**\n\nWelcome to **HISTERIA.AI** — a neo-brutalist autonomous agent interface powered by LangChain ReAct loops, Groq LLM inference, and Tavily real-time web intelligence.\n\nType any inquiry below or select a rapid prompt to trigger real-time tool execution and streaming response!`,
+      content: `⚡ **SYSTEM BOOT SEQUENCE COMPLETE.**\n\nWelcome to **HISTERIA.AI** — an autonomous research agent interface powered by LangChain ReAct loops and real-time web intelligence.\n\nType any inquiry below or select a rapid prompt to trigger real-time tool execution and streaming response!`,
       timestamp: 'SYSTEM INIT',
       toolUpdates: [],
     },
@@ -93,6 +93,35 @@ export default function App() {
             prev.map((msg) =>
               msg.id === assistantMsgId
                 ? { ...msg, content: msg.content + token }
+                : msg
+            )
+          );
+        },
+        onResult: (result) => {
+          let formattedContent = '';
+          if (typeof result === 'string') {
+            formattedContent = result;
+          } else if (result && typeof result === 'object') {
+            const parts = [];
+            if (result.answer) {
+              parts.push(result.answer);
+            }
+            if (Array.isArray(result.key_points) && result.key_points.length > 0) {
+              parts.push('### Key Points\n' + result.key_points.map((pt) => `- ${pt}`).join('\n'));
+            }
+            if (Array.isArray(result.sources) && result.sources.length > 0) {
+              parts.push('### Sources\n' + result.sources.map((s) => `- [${s.title || s.url}](${s.url})${s.relevance ? `: ${s.relevance}` : ''}`).join('\n'));
+            }
+            if (Array.isArray(result.limitations) && result.limitations.length > 0) {
+              parts.push('### Limitations\n' + result.limitations.map((lim) => `- ${lim}`).join('\n'));
+            }
+            formattedContent = parts.join('\n\n');
+          }
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMsgId
+                ? { ...msg, content: formattedContent }
                 : msg
             )
           );

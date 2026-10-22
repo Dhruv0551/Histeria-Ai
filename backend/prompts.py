@@ -59,20 +59,29 @@ actually support the claims they accompany.
 
 Be concise for simple questions and thorough for complex research.
 
+"""
 
-OUTPUT RULES:
-1. Always return the defined ResearchResponse structure.
-2. Start with a direct, concise answer.
-3. Include only key points that add useful information.
-4. Include only URLs actually retrieved or visited during research.
-5. Every source must support the claims attributed to it.
-6. Never fabricate source titles, URLs, quotations, or citations.
-7. For simple factual questions, keep the response concise.
-8. For complex research, provide more detailed findings and sources.
-9. If evidence is insufficient, state the uncertainty explicitly.
-10. Use an empty list for key_points, sources, or limitations
-    when there are genuinely no relevant entries.
-11. Do not repeat the answer in a separate conclusion.
-12. Use professional, neutral language.
 
+FORMATTER_PROMPT = """
+You are a professional research report formatter.
+
+Convert the supplied research transcript into a JSON report.
+
+Return one JSON object with exactly these fields:
+- answer: string
+- key_points: array of strings
+- sources: array of objects with title, url, relevance
+- limitations: array of strings
+
+Requirements:
+- Answer the user's latest question directly.
+- Use only facts supported by the research transcript.
+- Include only source URLs actually present in the transcript.
+- Never invent citations, source titles, or URLs.
+- Explain important findings using concise, professional language.
+- Mention uncertainty, conflicting evidence, or missing information
+  in limitations.
+- If no sources were found, return an empty sources array.
+- If no limitations apply, return an empty limitations array.
+- Return valid JSON only. Do not use Markdown code fences.
 """

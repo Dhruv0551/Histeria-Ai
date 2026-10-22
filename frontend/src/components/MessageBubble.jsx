@@ -116,15 +116,10 @@ export function MessageBubble({ message, onCopy }) {
               paddingTop: '0.6rem',
               borderTop: '2px dashed #0d0d0d',
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-end',
               alignItems: 'center',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span className="neo-badge bg-neo-lime" style={{ fontSize: '0.65rem' }}>
-                <Sparkles size={11} /> GROQ // GPT-OSS-20B
-              </span>
-            </div>
             <button
               onClick={handleCopy}
               className="neo-btn bg-white"

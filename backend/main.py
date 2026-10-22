@@ -1,3 +1,5 @@
+import uuid
+
 from controllers import process_user_query
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,5 +23,5 @@ def default():
 
 @app.post("/query")
 def processQuery(request: Query):
-    thread_id = "Convo-Memory 1"
+    thread_id = getattr(request, "thread_id", None) or str(uuid.uuid4())
     return process_user_query(request.query, thread_id)
