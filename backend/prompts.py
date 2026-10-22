@@ -58,4 +58,21 @@ Include source URLs when available and relevant. Ensure citations
 actually support the claims they accompany.
 
 Be concise for simple questions and thorough for complex research.
+
+
+OUTPUT RULES:
+1. Always return the defined ResearchResponse structure.
+2. Start with a direct, concise answer.
+3. Include only key points that add useful information.
+4. Include only URLs actually retrieved or visited during research.
+5. Every source must support the claims attributed to it.
+6. Never fabricate source titles, URLs, quotations, or citations.
+7. For simple factual questions, keep the response concise.
+8. For complex research, provide more detailed findings and sources.
+9. If evidence is insufficient, state the uncertainty explicitly.
+10. Use an empty list for key_points, sources, or limitations
+    when there are genuinely no relevant entries.
+11. Do not repeat the answer in a separate conclusion.
+12. Use professional, neutral language.
+
 """

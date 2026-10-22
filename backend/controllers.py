@@ -2,23 +2,23 @@ import json
 
 from fastapi.responses import StreamingResponse
 from langchain.agents import create_agent
+from langchain.messages import HumanMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from models import groq_model
 from prompts import agent_prompt
+from schemas import ResponseFormat
 from tools import Tools
 
 checkpointer = InMemorySaver()
 
 
 agent = create_agent(
-    model=groq_model, system_prompt=agent_prompt, tools=Tools, checkpointer=checkpointer
+    model=groq_model,
+    system_prompt=agent_prompt,
+    tools=Tools,
+    checkpointer=checkpointer,
+    response_format=ResponseFormat,
 )
-
-
-import json
-
-from fastapi.responses import StreamingResponse
-from langchain.messages import HumanMessage
 
 
 async def stream_user_query(query: str, thread_id: str):

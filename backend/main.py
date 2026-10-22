@@ -1,7 +1,7 @@
-from classes import Query
 from controllers import process_user_query
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from schemas import Query
 
 app = FastAPI()
 
