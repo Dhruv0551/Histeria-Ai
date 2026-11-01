@@ -36,7 +36,7 @@ Unlike typical chatbots that hallucinate or provide surface-level static answers
                ▼                                 ▼
    ┌───────────────────────┐         ┌───────────────────────┐
    │     Groq LLM Engine   │         │     Agent Tools       │
-   │ (ChatGroq / Llama /   │         │ • Tavily Web Search   │
+   │ (ChatGroq /           │         │ • Tavily Web Search   │
    │  openai/gpt-oss-120b) │         │ • URL Data Scraper    │
    └───────────┬───────────┘         └───────────────────────┘
                │
@@ -187,14 +187,19 @@ venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Create .env file with your API keys
-echo GROQ_API_KEY=your_groq_api_key_here >> .env
-echo TAVILY_API_KEY=your_tavily_api_key_here >> .env
+# Configure environment variables
+# Copy .env.example to .env
+cp .env.example .env
+
+# Edit .env and supply your API keys:
+# GROQ_API_KEY=gsk_...
+# TAVILY_API_KEY=tvly-...
+# (Optional) GROQ_MODEL=openai/gpt-oss-120b
 
 # Start FastAPI server
 uvicorn main:app --reload --port 8000
 ```
-API server runs at `http://localhost:8000`.
+API server runs at `http://localhost:8000`. You can verify health and active models at `http://localhost:8000/`.
 
 ### 2. Frontend Setup
 
@@ -208,6 +213,18 @@ npm install
 npm run dev
 ```
 Client runs at `http://localhost:5173`.
+
+---
+
+## 🔧 Troubleshooting & Common Errors
+
+| Error | Root Cause | Solution |
+| :--- | :--- | :--- |
+| **`404 - The model ... does not exist`** | The model ID configured is retired or not accessible on your Groq tier (e.g. `llama-3.3-70b-versatile`). | Set `GROQ_MODEL=openai/gpt-oss-120b` or `openai/gpt-oss-20b` in `backend/.env`. Check active models at [Groq Models](https://console.groq.com/docs/models). |
+| **`401 - Invalid API Key`** | Missing or incorrect `GROQ_API_KEY`. | Verify your key at [Groq Console Keys](https://console.groq.com/keys) and update `backend/.env`. |
+| **`429 - Rate Limit Exceeded`** | Exceeded TPM (tokens per minute) limit on free Groq tier. | Wait 30–60 seconds, or switch to the faster/lighter `GROQ_MODEL=openai/gpt-oss-20b` in `backend/.env`. |
+| **`Tavily Search Error`** | Missing or invalid `TAVILY_API_KEY`. | Obtain a free key at [Tavily](https://tavily.com) and add `TAVILY_API_KEY=...` to `backend/.env`. |
+| **`Missing GROQ_API_KEY` on boot** | Server started without `.env` configured. | Copy `.env.example` to `backend/.env` and add your keys. |
 
 ---
 

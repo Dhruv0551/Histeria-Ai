@@ -1,10 +1,28 @@
 from typing import Literal
-
 from pydantic import BaseModel, Field
 
 
 class Query(BaseModel):
     query: str
+    thread_id: str | None = None
+
+
+class QueryClassification(BaseModel):
+    intent: Literal["factual", "research", "comparison", "creative", "conversational"] = Field(
+        description="Primary intent of the query."
+    )
+    complexity: Literal["simple", "moderate", "complex"] = Field(
+        description="Estimated complexity."
+    )
+    needs_tools: bool = Field(
+        description="Whether research tools should be used."
+    )
+    research_directive: str = Field(
+        description="Specific task instruction for the research model."
+    )
+    original_query: str = Field(
+        description="Verbatim user query."
+    )
 
 
 class Source(BaseModel):

@@ -1,12 +1,5 @@
-/**
- * API client to communicate with the FastAPI backend
- */
-
 const API_BASE_URL = 'http://localhost:8000';
 
-/**
- * Check backend health status
- */
 export async function checkBackendHealth() {
   try {
     const res = await fetch(`${API_BASE_URL}/`, {
@@ -21,18 +14,6 @@ export async function checkBackendHealth() {
   }
 }
 
-/**
- * Stream query to /query endpoint
- * Parses text/event-stream chunks formatted as `data: {"type": ..., "content": ...}\n\n`
- *
- * @param {string} query
- * @param {object} callbacks
- * @param {function} callbacks.onToken
- * @param {function} callbacks.onResult
- * @param {function} callbacks.onStatus
- * @param {function} callbacks.onDone
- * @param {function} callbacks.onError
- */
 export async function streamAgentQuery(query, { onToken, onResult, onStatus, onDone, onError }) {
   try {
     const response = await fetch(`${API_BASE_URL}/query`, {
@@ -60,7 +41,6 @@ export async function streamAgentQuery(query, { onToken, onResult, onStatus, onD
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n\n');
       
-      // Keep unfinished part in buffer
       buffer = lines.pop() || '';
 
       for (const line of lines) {
@@ -87,7 +67,6 @@ export async function streamAgentQuery(query, { onToken, onResult, onStatus, onD
       }
     }
 
-    // Process remainder if any
     if (buffer.trim().startsWith('data: ')) {
       const jsonStr = buffer.trim().slice(6);
       try {
@@ -98,7 +77,6 @@ export async function streamAgentQuery(query, { onToken, onResult, onStatus, onD
         if (parsed.type === 'error') onError?.(parsed.content);
         if (parsed.type === 'done') onDone?.();
       } catch (e) {
-        // ignore
       }
     }
 

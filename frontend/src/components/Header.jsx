@@ -4,7 +4,6 @@ import { Skull, Radio, Terminal, ExternalLink, Sparkles } from 'lucide-react';
 export function Header({ backendOnline }) {
   return (
     <header style={{ marginBottom: '1.25rem', width: '100%' }}>
-      {/* Top Ticker Marquee */}
       <div
         style={{
           backgroundColor: '#0d0d0d',
@@ -29,7 +28,6 @@ export function Header({ backendOnline }) {
         </div>
       </div>
 
-      {/* Main Navbar */}
       <div
         className="neo-box-lg bg-white"
         style={{
@@ -40,7 +38,6 @@ export function Header({ backendOnline }) {
           marginTop: '0.75rem',
         }}
       >
-        {/* Brand Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           <div
             className="neo-box bg-neo-yellow"
@@ -82,7 +79,6 @@ export function Header({ backendOnline }) {
           </div>
         </div>
 
-        {/* Badges / Links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div
             className={`neo-badge ${backendOnline ? 'bg-neo-lime' : 'bg-neo-pink'}`}

@@ -3,7 +3,7 @@ import React from 'react';
 export function NeoButton({
   children,
   onClick,
-  variant = 'yellow', // 'yellow' | 'pink' | 'cyan' | 'lime' | 'white' | 'black'
+  variant = 'yellow',
   size = 'md',
   className = '',
   disabled = false,

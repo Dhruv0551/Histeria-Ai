@@ -34,7 +34,6 @@ export function Sidebar({ backendOnline, messageCount, onSelectPrompt }) {
         alignSelf: 'stretch',
       }}
     >
-      {/* System Status Panel */}
       <div
         className="neo-box bg-neo-yellow"
         style={{ padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}
@@ -68,7 +67,6 @@ export function Sidebar({ backendOnline, messageCount, onSelectPrompt }) {
         </div>
       </div>
 
-      {/* Agent Arsenal / Tools */}
       <div>
         <div
           style={{
@@ -127,7 +125,6 @@ export function Sidebar({ backendOnline, messageCount, onSelectPrompt }) {
         </div>
       </div>
 
-      {/* Suggested Starter Prompts */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div
           style={{
@@ -171,7 +168,6 @@ export function Sidebar({ backendOnline, messageCount, onSelectPrompt }) {
         </div>
       </div>
 
-      {/* Neo-brutalist Footer stats */}
       <div
         className="neo-box bg-neo-purple"
         style={{

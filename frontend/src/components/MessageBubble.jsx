@@ -21,7 +21,6 @@ export function MessageBubble({ message, onCopy }) {
         width: '100%',
       }}
     >
-      {/* Header Badge */}
       <div
         style={{
           display: 'flex',
@@ -49,7 +48,6 @@ export function MessageBubble({ message, onCopy }) {
         </span>
       </div>
 
-      {/* Main Bubble */}
       <div
         className={isUser ? 'neo-box bg-neo-yellow' : 'neo-box-lg bg-white'}
         style={{
@@ -58,7 +56,6 @@ export function MessageBubble({ message, onCopy }) {
           position: 'relative',
         }}
       >
-        {/* Tool Updates / Thoughts */}
         {!isUser && message.toolUpdates && message.toolUpdates.length > 0 && (
           <div
             style={{
@@ -88,7 +85,6 @@ export function MessageBubble({ message, onCopy }) {
           </div>
         )}
 
-        {/* Message Content */}
         <div
           className="rendered-markdown"
           style={{
@@ -108,7 +104,6 @@ export function MessageBubble({ message, onCopy }) {
           )}
         </div>
 
-        {/* Actions row */}
         {!isUser && message.content && (
           <div
             style={{

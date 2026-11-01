@@ -27,7 +27,6 @@ export default function App() {
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Poll backend health status
   const checkHealth = async () => {
     const res = await checkBackendHealth();
     setBackendOnline(res.ok);
@@ -44,7 +43,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -53,13 +51,11 @@ export default function App() {
     scrollToBottom();
   }, [messages, activeNode]);
 
-  // Handle Query Submission
   const handleSubmit = async (e) => {
     e?.preventDefault();
     const query = inputQuery.trim();
     if (!query || isStreaming) return;
 
-    // User message
     const userMsgId = `user-${Date.now()}`;
     const assistantMsgId = `bot-${Date.now()}`;
 
@@ -150,21 +146,19 @@ export default function App() {
               colors: ['#ffee00', '#ff5277', '#00f0ff', '#10e060'],
             });
           } catch (e) {
-            // ignore
           }
         },
         onError: (err) => {
           setIsStreaming(false);
           setActiveNode(null);
-          setErrorMessage(`Execution Error: ${err}`);
+          const errorText = typeof err === 'string' && err.trim().length > 0 ? err : 'Execution failed';
+          setErrorMessage(errorText);
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMsgId
                 ? {
                     ...msg,
-                    content:
-                      msg.content ||
-                      `❌ Failed to complete query. Please make sure the FastAPI backend is running and valid API keys (GROQ_API_KEY, TAVILY_API_KEY) are set in backend/.env`,
+                    content: `⚠️ **Execution Error**\n\n${errorText}`,
                   }
                 : msg
             )
@@ -174,7 +168,18 @@ export default function App() {
     } catch (err) {
       setIsStreaming(false);
       setActiveNode(null);
-      setErrorMessage(err.message);
+      const errorMsg = err?.message || 'Failed to communicate with backend server';
+      setErrorMessage(errorMsg);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMsgId
+            ? {
+                ...msg,
+                content: `⚠️ **Connection Error**\n\nCould not reach the backend API server. Please ensure FastAPI is running on http://localhost:8000.\n\nDetails: ${errorMsg}`,
+              }
+            : msg
+        )
+      );
     }
   };
 
@@ -210,10 +215,8 @@ export default function App() {
         flexDirection: 'column',
       }}
     >
-      {/* Header */}
       <Header backendOnline={backendOnline} />
 
-      {/* Backend Alert Banner if disconnected */}
       {!backendOnline && (
         <div
           className="neo-box bg-neo-pink"
@@ -245,7 +248,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Workspace (Sidebar + Chat Area) */}
       <div
         style={{
           display: 'flex',
@@ -255,7 +257,6 @@ export default function App() {
           flexDirection: 'row',
         }}
       >
-        {/* Left Side Telemetry & Quick Commands */}
         <Sidebar
           backendOnline={backendOnline}
           messageCount={messages.filter((m) => m.role === 'user').length}
@@ -265,7 +266,6 @@ export default function App() {
           }}
         />
 
-        {/* Right Side Main Console */}
         <main
           className="neo-box-xl bg-white"
           style={{
@@ -276,7 +276,6 @@ export default function App() {
             backgroundColor: '#ffffff',
           }}
         >
-          {/* Console Header Bar */}
           <div
             style={{
               backgroundColor: '#ffee00',
@@ -318,7 +317,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Active Status bar during agent tool loops */}
           {activeNode && (
             <div
               style={{
@@ -339,7 +337,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Message Stream Area */}
           <div
             style={{
               flex: 1,
@@ -358,7 +355,6 @@ export default function App() {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input Box Footer */}
           <footer
             style={{
               padding: '1.25rem',
@@ -416,7 +412,6 @@ export default function App() {
               </button>
             </form>
 
-            {/* Micro Helper Tags */}
             <div
               style={{
                 display: 'flex',
