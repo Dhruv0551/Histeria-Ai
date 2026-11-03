@@ -26,6 +26,12 @@ research_agent = create_agent(
 synthesizer = groq_model.bind(response_format={"type": "json_object"})
 classifier = classifier_model.bind(response_format={"type": "json_object"})
 
+_RECURSION_LIMITS = {
+    "simple": 6,
+    "moderate": 12,
+    "complex": 25,
+}
+
 
 def content_to_text(content) -> str:
     if isinstance(content, str):
@@ -45,6 +51,19 @@ def content_to_text(content) -> str:
     if isinstance(content, (dict, list)):
         return json.dumps(content, ensure_ascii=False, default=str)
     return str(content)
+
+
+def extract_findings(messages) -> str:
+    parts = []
+    for message in messages:
+        msg_type = getattr(message, "type", "")
+        if msg_type in ("ai", "tool"):
+            content = content_to_text(getattr(message, "content", "")).strip()
+            if content:
+                label = "ASSISTANT" if msg_type == "ai" else "TOOL RESULT"
+                parts.append(f"{label}:\n{content}")
+    joined = "\n\n".join(parts)
+    return joined[:8000]
 
 
 def build_research_transcript(messages) -> str:
@@ -93,14 +112,18 @@ async def classify_query(query: str) -> QueryClassification:
 
 async def run_research_agent(classification: QueryClassification, thread_id: str):
     research_thread_id = f"{thread_id}_{uuid.uuid4().hex[:8]}"
-    config = {"configurable": {"thread_id": research_thread_id}}
+    recursion_limit = _RECURSION_LIMITS.get(classification.complexity, 12)
+    config = {
+        "configurable": {"thread_id": research_thread_id},
+        "recursion_limit": recursion_limit,
+    }
 
     directive_message = (
         f"[Research Directive]\n{classification.research_directive}\n\n"
         f"[Original Query]\n{classification.original_query}"
     )
 
-    events = []
+    status_events = []
     async for mode, chunk in research_agent.astream(
         {"messages": [HumanMessage(content=directive_message)]},
         config=config,
@@ -110,25 +133,24 @@ async def run_research_agent(classification: QueryClassification, thread_id: str
             continue
         for node in chunk:
             if node == "model":
-                status = "Researching"
+                status = "Researching…"
             elif node == "tools":
-                status = "Using research tools"
+                status = "Using research tools…"
             else:
                 status = f"Processing: {node}"
-            events.append(sse_event("status", status))
+            status_events.append(sse_event("status", status))
 
     final_state = await research_agent.aget_state(config)
     all_messages = final_state.values.get("messages", []) if final_state else []
 
-    transcript = build_research_transcript(all_messages)
-    return transcript, events
+    findings = extract_findings(all_messages)
+    return findings, status_events
 
 
 async def synthesize_response(original_query: str, research_transcript: str) -> ResponseFormat:
-    trimmed_transcript = research_transcript[:6000] if len(research_transcript) > 6000 else research_transcript
     synthesis_input = (
         f"[ORIGINAL USER QUERY]\n{original_query}\n\n"
-        f"[RESEARCH TRANSCRIPT]\n{trimmed_transcript}"
+        f"[RESEARCH FINDINGS]\n{research_transcript}"
     )
     response = await synthesizer.ainvoke(
         [
@@ -142,7 +164,6 @@ async def synthesize_response(original_query: str, research_transcript: str) -> 
 
 
 def format_error_message(exc: Exception) -> str:
-    """Format exceptions into actionable, user-friendly error diagnostics."""
     chain = []
     current = exc
     while current and len(chain) < 5:
@@ -239,7 +260,7 @@ async def stream_user_query(query: str, thread_id: str):
             yield sse_event("done")
             return
 
-        yield sse_event("status", "Classifying query")
+        yield sse_event("status", "Classifying query…")
         classification = await classify_query(query)
         yield sse_event(
             "classification",
@@ -250,7 +271,7 @@ async def stream_user_query(query: str, thread_id: str):
             },
         )
 
-        yield sse_event("status", "Starting research")
+        yield sse_event("status", "Starting research…")
 
         if classification.needs_tools:
             research_transcript, research_events = await run_research_agent(
@@ -274,9 +295,25 @@ async def stream_user_query(query: str, thread_id: str):
             yield sse_event("status", "Direct response generated")
 
         if not research_transcript.strip():
-            raise ValueError("Research returned no findings.")
+            logger.warning("Research returned empty transcript — falling back to direct model call.")
+            yield sse_event("status", "Retrying with direct knowledge…")
+            response = await research_model.ainvoke(
+                [
+                    SystemMessage(content=RESEARCH_AGENT_PROMPT),
+                    HumanMessage(
+                        content=(
+                            f"[Research Directive]\nAnswer this directly from your knowledge: {query}\n\n"
+                            f"[Original Query]\n{query}"
+                        )
+                    ),
+                ]
+            )
+            research_transcript = content_to_text(response.content)
 
-        yield sse_event("status", "Synthesizing final report")
+        if not research_transcript.strip():
+            raise ValueError("Research returned no findings even after fallback.")
+
+        yield sse_event("status", "Synthesizing final report…")
         report = await synthesize_response(
             original_query=classification.original_query,
             research_transcript=research_transcript,

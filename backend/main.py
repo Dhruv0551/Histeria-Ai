@@ -79,4 +79,3 @@ def default():
 def processQuery(request: Query):
     thread_id = request.thread_id or str(uuid.uuid4())
     return process_user_query(request.query, thread_id)
-

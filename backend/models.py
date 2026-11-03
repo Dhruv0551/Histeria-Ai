@@ -37,4 +37,3 @@ SYNTHESIZER_MODEL_NAME = os.getenv("GROQ_SYNTHESIZER_MODEL", DEFAULT_GROQ_MODEL)
 classifier_model = ChatGroq(model=CLASSIFIER_MODEL_NAME, api_key=groq_key)
 research_model = ChatGroq(model=RESEARCH_MODEL_NAME, api_key=groq_key)
 groq_model = ChatGroq(model=SYNTHESIZER_MODEL_NAME, api_key=groq_key)
-
