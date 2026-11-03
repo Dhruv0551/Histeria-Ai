@@ -27,9 +27,9 @@ synthesizer = groq_model.bind(response_format={"type": "json_object"})
 classifier = classifier_model.bind(response_format={"type": "json_object"})
 
 _RECURSION_LIMITS = {
-    "simple": 6,
-    "moderate": 12,
-    "complex": 25,
+    "simple": 25,
+    "moderate": 50,
+    "complex": 100,
 }
 
 
@@ -112,7 +112,7 @@ async def classify_query(query: str) -> QueryClassification:
 
 async def run_research_agent(classification: QueryClassification, thread_id: str):
     research_thread_id = f"{thread_id}_{uuid.uuid4().hex[:8]}"
-    recursion_limit = _RECURSION_LIMITS.get(classification.complexity, 12)
+    recursion_limit = _RECURSION_LIMITS.get(classification.complexity, 50)
     config = {
         "configurable": {"thread_id": research_thread_id},
         "recursion_limit": recursion_limit,
@@ -124,21 +124,28 @@ async def run_research_agent(classification: QueryClassification, thread_id: str
     )
 
     status_events = []
-    async for mode, chunk in research_agent.astream(
-        {"messages": [HumanMessage(content=directive_message)]},
-        config=config,
-        stream_mode=["updates"],
-    ):
-        if mode != "updates":
-            continue
-        for node in chunk:
-            if node == "model":
-                status = "Researching…"
-            elif node == "tools":
-                status = "Using research tools…"
-            else:
-                status = f"Processing: {node}"
-            status_events.append(sse_event("status", status))
+    try:
+        async for mode, chunk in research_agent.astream(
+            {"messages": [HumanMessage(content=directive_message)]},
+            config=config,
+            stream_mode=["updates"],
+        ):
+            if mode != "updates":
+                continue
+            for node in chunk:
+                if node == "model":
+                    status = "Researching…"
+                elif node == "tools":
+                    status = "Using research tools…"
+                else:
+                    status = f"Processing: {node}"
+                status_events.append(sse_event("status", status))
+    except Exception as e:
+        if "GraphRecursionError" in type(e).__name__ or "recursion" in str(e).lower():
+            logger.warning("Research agent hit recursion limit — recovering partial findings.")
+            status_events.append(sse_event("status", "Recovering partial findings…"))
+        else:
+            raise
 
     final_state = await research_agent.aget_state(config)
     all_messages = final_state.values.get("messages", []) if final_state else []
