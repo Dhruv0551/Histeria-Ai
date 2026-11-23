@@ -4,7 +4,7 @@ import { Send, Trash2, ArrowDown, Bot, AlertTriangle, Sparkles, RefreshCw } from
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { MessageBubble } from './components/MessageBubble';
-import { checkBackendHealth, streamAgentQuery } from './services/api';
+import { checkBackendHealth, streamAgentQuery, API_BASE_URL } from './services/api';
 import './index.css';
 import './neo-style.css';
 
@@ -31,7 +31,7 @@ export default function App() {
     const res = await checkBackendHealth();
     setBackendOnline(res.ok);
     if (!res.ok) {
-      setErrorMessage('Backend is offline. Run `python -m uvicorn main:app --reload` on port 8000');
+      setErrorMessage(`Backend is offline. Unable to reach ${API_BASE_URL}`);
     } else {
       setErrorMessage(null);
     }
@@ -175,7 +175,7 @@ export default function App() {
           msg.id === assistantMsgId
             ? {
                 ...msg,
-                content: `⚠️ **Connection Error**\n\nCould not reach the backend API server. Please ensure FastAPI is running on http://localhost:8000.\n\nDetails: ${errorMsg}`,
+                content: `⚠️ **Connection Error**\n\nCould not reach the backend API server at ${API_BASE_URL}.\n\nDetails: ${errorMsg}`,
               }
             : msg
         )
@@ -232,9 +232,9 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', fontWeight: 800 }}>
             <AlertTriangle size={22} color="#fff" />
             <div>
-              <span>BACKEND SERVICE NOT DETECTED AT http://localhost:8000</span>
+              <span>BACKEND SERVICE NOT DETECTED AT {API_BASE_URL}</span>
               <div style={{ fontSize: '0.78rem', opacity: 0.9, marginTop: '2px' }}>
-                Run: <code>cd backend && uvicorn main:app --reload</code>
+                Verify backend URL in <code>frontend/.env</code> or start local server
               </div>
             </div>
           </div>
