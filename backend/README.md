@@ -2,6 +2,9 @@
 
 FastAPI-powered streaming backend for autonomous research and structured synthesis using LangChain, LangGraph ReAct agent loops, and Groq inference.
 
+- 🌐 **Live Deployed API**: [https://histeria-ai.onrender.com](https://histeria-ai.onrender.com)
+- 🏥 **Health Check & Telemetry**: [https://histeria-ai.onrender.com/](https://histeria-ai.onrender.com/)
+
 ---
 
 ## 🚀 Architecture & Endpoints

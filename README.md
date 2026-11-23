@@ -2,6 +2,13 @@
 
 > **An Autonomous Research & Decision-Making Agent** powered by LangChain, LangGraph ReAct loops, Groq ultra-fast LLM inference, and real-time multi-source web intelligence.
 
+[![Frontend](https://img.shields.io/badge/Frontend-Vercel-black?style=flat&logo=vercel)](https://histeria-ai.vercel.app)
+[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat&logo=render)](https://histeria-ai.onrender.com)
+[![Status](https://img.shields.io/badge/API%20Status-Live-success?style=flat)](https://histeria-ai.onrender.com/)
+
+- 🌐 **Live Web Application**: [https://histeria-ai.vercel.app](https://histeria-ai.vercel.app)
+- ⚙️ **Production API (Render)**: [https://histeria-ai.onrender.com](https://histeria-ai.onrender.com)
+
 ---
 
 ## 🌟 Overview
@@ -194,13 +201,17 @@ cp .env.example .env
 # Edit .env and supply your API keys:
 # GROQ_API_KEY=gsk_...
 # TAVILY_API_KEY=tvly-...
-# ALLOWED_ORIGINS=https://histeria-ai.vercel.app,http://localhost:5173
+# ALLOWED_ORIGINS=https://histeria-ai.vercel.app,https://histeria-ai.onrender.com,http://localhost:5173
 # (Optional) GROQ_MODEL=openai/gpt-oss-120b
 
-# Start FastAPI server
+# Start FastAPI server (Local)
 uvicorn main:app --reload --port 8000
+
+# Production Start Command (Render):
+# uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
-API server runs at `http://localhost:8000`. You can verify health and active models at `http://localhost:8000/`.
+Local API server runs at `http://localhost:8000`. Deployed production API runs at `https://histeria-ai.onrender.com`.
+Verify health and status at `https://histeria-ai.onrender.com/`.
 
 ### 2. Frontend Setup
 
