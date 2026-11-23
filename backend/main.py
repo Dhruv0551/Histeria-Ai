@@ -44,9 +44,26 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+raw_origins = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins = [
+    "https://histeria-ai.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://localhost:8000",
+]
+if raw_origins.strip():
+    for item in raw_origins.split(","):
+        cleaned = item.strip().rstrip("/")
+        if cleaned and cleaned not in allowed_origins:
+            allowed_origins.append(cleaned)
+
+# Support origins both with and without trailing slash
+cors_origins = list({origin.rstrip("/") for origin in allowed_origins} | {f"{origin.rstrip('/')}/" for origin in allowed_origins})
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
