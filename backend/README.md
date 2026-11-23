@@ -32,7 +32,8 @@ cp .env.example .env
 | `GROQ_MODEL` | No | `openai/gpt-oss-120b` | General Groq model used for research & synthesis |
 | `GROQ_CLASSIFIER_MODEL` | No | `openai/gpt-oss-20b` | Fast model for routing and query classification |
 | `GROQ_RESEARCH_MODEL` | No | `openai/gpt-oss-120b` | Model executing multi-step ReAct agent research |
-| `GROQ_SYNTHESIZER_MODEL` | No | `openai/gpt-oss-120b` | Model structuring research findings into Pydantic JSON |
+| `GROQ_SYNTHESIZER_MODEL` | No | `openai/gpt-oss-20b` | Model structuring research findings into Pydantic JSON |
+| `ALLOWED_ORIGINS` | No | `https://histeria-ai.vercel.app,http://localhost:5173,...` | Comma-separated list of allowed CORS origins |
 
 > **Note on Groq Models**: Ensure you are using models currently supported by Groq (such as `openai/gpt-oss-120b` or `openai/gpt-oss-20b`). Retired model IDs (e.g., `llama-3.3-70b-versatile`) will return a 404 `model_not_found` error.
 

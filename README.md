@@ -194,6 +194,7 @@ cp .env.example .env
 # Edit .env and supply your API keys:
 # GROQ_API_KEY=gsk_...
 # TAVILY_API_KEY=tvly-...
+# ALLOWED_ORIGINS=https://histeria-ai.vercel.app,http://localhost:5173
 # (Optional) GROQ_MODEL=openai/gpt-oss-120b
 
 # Start FastAPI server
@@ -209,10 +210,15 @@ cd frontend
 # Install npm packages
 npm install
 
+# Configure environment variables
+# Copy .env.example to .env
+cp .env.example .env
+# Set VITE_API_BASE_URL to your backend URL (e.g. http://localhost:8000 or deployed endpoint)
+
 # Start Vite development server
 npm run dev
 ```
-Client runs at `http://localhost:5173`.
+Client runs at `http://localhost:5173`. For production deployment (e.g., Vercel), set `VITE_API_BASE_URL` in your hosting dashboard.
 
 ---
 
