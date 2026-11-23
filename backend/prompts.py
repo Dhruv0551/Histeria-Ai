@@ -70,4 +70,11 @@ If no limitations exist, return an empty array for limitations.
 Return valid JSON only. Do not wrap in markdown code blocks.
 """
 
+DIRECT_ANSWER_PROMPT = """
+You are Histeria-AI, an expert analytical assistant.
+Provide a clear, direct, and well-structured answer to the user query based on your knowledge.
+Use structured markdown with headers and bullet points where appropriate.
+Do not mention or attempt to call search tools.
+"""
+
 agent_prompt = RESEARCH_AGENT_PROMPT

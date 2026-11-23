@@ -7,7 +7,12 @@ from langchain.agents import create_agent
 from langchain.messages import HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from models import classifier_model, groq_model, research_model
-from prompts import CLASSIFIER_PROMPT, FORMATTER_PROMPT, RESEARCH_AGENT_PROMPT
+from prompts import (
+    CLASSIFIER_PROMPT,
+    DIRECT_ANSWER_PROMPT,
+    FORMATTER_PROMPT,
+    RESEARCH_AGENT_PROMPT,
+)
 from pydantic import ValidationError
 from schemas import QueryClassification, ResponseFormat
 from tools import Tools
@@ -54,16 +59,28 @@ def content_to_text(content) -> str:
 
 
 def extract_findings(messages) -> str:
-    parts = []
+    ai_parts = []
+    tool_parts = []
     for message in messages:
         msg_type = getattr(message, "type", "")
-        if msg_type in ("ai", "tool"):
-            content = content_to_text(getattr(message, "content", "")).strip()
-            if content:
-                label = "ASSISTANT" if msg_type == "ai" else "TOOL RESULT"
-                parts.append(f"{label}:\n{content}")
+        content = content_to_text(getattr(message, "content", "")).strip()
+        if not content:
+            continue
+        if msg_type == "ai":
+            ai_parts.append(f"ASSISTANT:\n{content}")
+        elif msg_type == "tool":
+            tool_parts.append(f"TOOL RESULT:\n{content}")
+
+    parts = []
+    if tool_parts:
+        parts.extend(tool_parts[-4:])
+    if ai_parts:
+        parts.extend(ai_parts)
+
     joined = "\n\n".join(parts)
-    return joined[:8000]
+    if len(joined) > 8000:
+        joined = joined[:3000] + "\n\n[...]\n\n" + joined[-5000:]
+    return joined
 
 
 def build_research_transcript(messages) -> str:
@@ -141,17 +158,48 @@ async def run_research_agent(classification: QueryClassification, thread_id: str
                     status = f"Processing: {node}"
                 status_events.append(sse_event("status", status))
     except Exception as e:
-        if "GraphRecursionError" in type(e).__name__ or "recursion" in str(e).lower():
+        err_str = str(e).lower()
+        if "graphrecursionerror" in type(e).__name__.lower() or "recursion" in err_str:
             logger.warning("Research agent hit recursion limit — recovering partial findings.")
-            status_events.append(sse_event("status", "Recovering partial findings…"))
+            status_events.append(sse_event("status", "Recursion limit reached — recovering findings…"))
+        elif any(k in err_str for k in ("rate_limit", "429", "token", "context_length", "too large")):
+            logger.warning("Research agent hit token/rate limit — recovering partial findings: %s", e)
+            status_events.append(sse_event("status", "Token limit exceeded — synthesizing available findings…"))
         else:
-            raise
+            logger.warning("Research agent encountered exception (%s) — attempting recovery: %s", type(e).__name__, e)
+            status_events.append(sse_event("status", "Recovering findings…"))
 
-    final_state = await research_agent.aget_state(config)
-    all_messages = final_state.values.get("messages", []) if final_state else []
+    try:
+        final_state = await research_agent.aget_state(config)
+        all_messages = final_state.values.get("messages", []) if final_state else []
+    except Exception as state_err:
+        logger.warning("Could not read agent state: %s", state_err)
+        all_messages = []
 
     findings = extract_findings(all_messages)
     return findings, status_events
+
+
+def parse_json_safely(raw: str) -> dict:
+    cleaned = raw.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(cleaned[start : end + 1])
+            except json.JSONDecodeError:
+                pass
+        raise
 
 
 async def synthesize_response(original_query: str, research_transcript: str) -> ResponseFormat:
@@ -159,15 +207,28 @@ async def synthesize_response(original_query: str, research_transcript: str) -> 
         f"[ORIGINAL USER QUERY]\n{original_query}\n\n"
         f"[RESEARCH FINDINGS]\n{research_transcript}"
     )
-    response = await synthesizer.ainvoke(
-        [
-            SystemMessage(content=FORMATTER_PROMPT),
-            HumanMessage(content=synthesis_input),
-        ]
-    )
-    raw = content_to_text(response.content)
-    data = json.loads(raw)
-    return ResponseFormat.model_validate(data)
+    try:
+        response = await synthesizer.ainvoke(
+            [
+                SystemMessage(content=FORMATTER_PROMPT),
+                HumanMessage(content=synthesis_input),
+            ]
+        )
+        raw = content_to_text(response.content)
+        data = parse_json_safely(raw)
+        return ResponseFormat.model_validate(data)
+    except Exception as exc:
+        logger.warning("Synthesizer failed or output tokens exceeded (%s), falling back to structured extraction: %s", type(exc).__name__, exc)
+        clean_text = research_transcript.strip()
+        for prefix in ("ASSISTANT:\n", "ASSISTANT:", "TOOL RESULT:\n", "TOOL RESULT:"):
+            clean_text = clean_text.replace(prefix, "")
+        clean_text = clean_text.strip()
+        return ResponseFormat(
+            answer=clean_text if clean_text else "Direct answer processed from knowledge base.",
+            key_points=[],
+            sources=[],
+            limitations=["Direct response formatting applied following token limit recovery."]
+        )
 
 
 def format_error_message(exc: Exception) -> str:
@@ -287,32 +348,24 @@ async def stream_user_query(query: str, thread_id: str):
             for event in research_events:
                 yield event
         else:
+            yield sse_event("status", "Generating direct response…")
             response = await research_model.ainvoke(
                 [
-                    SystemMessage(content=RESEARCH_AGENT_PROMPT),
-                    HumanMessage(
-                        content=(
-                            f"[Research Directive]\n{classification.research_directive}\n\n"
-                            f"[Original Query]\n{classification.original_query}"
-                        )
-                    ),
+                    SystemMessage(content=DIRECT_ANSWER_PROMPT),
+                    HumanMessage(content=classification.original_query),
                 ]
             )
             research_transcript = content_to_text(response.content)
             yield sse_event("status", "Direct response generated")
 
         if not research_transcript.strip():
-            logger.warning("Research returned empty transcript — falling back to direct model call.")
-            yield sse_event("status", "Retrying with direct knowledge…")
-            response = await research_model.ainvoke(
+            logger.warning("Research returned empty transcript — falling back to direct model knowledge.")
+            yield sse_event("status", "Tokens/context limit reached — generating direct response…")
+            fallback_model = classifier_model if classifier_model else research_model
+            response = await fallback_model.ainvoke(
                 [
-                    SystemMessage(content=RESEARCH_AGENT_PROMPT),
-                    HumanMessage(
-                        content=(
-                            f"[Research Directive]\nAnswer this directly from your knowledge: {query}\n\n"
-                            f"[Original Query]\n{query}"
-                        )
-                    ),
+                    SystemMessage(content=DIRECT_ANSWER_PROMPT),
+                    HumanMessage(content=f"Please answer this inquiry clearly and thoroughly:\n{query}"),
                 ]
             )
             research_transcript = content_to_text(response.content)

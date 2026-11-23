@@ -114,6 +114,12 @@ export default function App() {
             formattedContent = parts.join('\n\n');
           }
 
+          if (!formattedContent.trim()) {
+            formattedContent = typeof result === 'object' && result?.answer
+              ? result.answer
+              : (typeof result === 'string' ? result : JSON.stringify(result, null, 2));
+          }
+
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMsgId
