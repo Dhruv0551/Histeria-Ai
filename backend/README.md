@@ -41,6 +41,7 @@ cp .env.example .env
 
 ## 🏃 Running the Server
 
+### Local Development
 ```bash
 # Activate virtual environment
 venv\Scripts\activate   # Windows
@@ -52,3 +53,9 @@ pip install -r requirements.txt
 # Start FastAPI server
 uvicorn main:app --reload --port 8000
 ```
+
+### Production Deployment (e.g. Render)
+- **Root Directory**: `backend`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+  *(Note: Bind to `0.0.0.0` and dynamic `$PORT`; do not use `--reload` in production)*

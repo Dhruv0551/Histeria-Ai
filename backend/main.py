@@ -70,7 +70,7 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def default():
     groq_configured = bool(
         os.getenv("GROQ_API_KEY")
@@ -96,3 +96,9 @@ def default():
 def processQuery(request: Query):
     thread_id = request.thread_id or str(uuid.uuid4())
     return process_user_query(request.query, thread_id)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
