@@ -1,250 +1,372 @@
 # ⚡ Histeria-AI
 
-> **An Autonomous Research & Decision-Making Agent** powered by LangChain, LangGraph ReAct loops, Groq ultra-fast LLM inference, and real-time multi-source web intelligence.
+> **Autonomous Research & Decision-Making Intelligence Engine**  
+> Powered by LangChain, LangGraph ReAct execution loops, Groq LPU ultra-fast inference, real-time multi-source web intelligence, and structured Pydantic synthesis.
 
-[![Frontend](https://img.shields.io/badge/Frontend-Vercel-black?style=flat&logo=vercel)](https://histeria-ai.vercel.app)
-[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat&logo=render)](https://histeria-ai.onrender.com)
-[![Status](https://img.shields.io/badge/API%20Status-Live-success?style=flat)](https://histeria-ai.onrender.com/)
+[![Frontend Deployment](https://img.shields.io/badge/Frontend-Vercel-black?style=flat&logo=vercel)](https://histeria-ai.vercel.app)
+[![Backend Deployment](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat&logo=render)](https://histeria-ai.onrender.com)
+[![API Status](https://img.shields.io/badge/API%20Status-Live%20%26%20Operational-success?style=flat)](https://histeria-ai.onrender.com/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat&logo=react)](https://react.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-- 🌐 **Live Web Application**: [https://histeria-ai.vercel.app](https://histeria-ai.vercel.app)
-- ⚙️ **Production API (Render)**: [https://histeria-ai.onrender.com](https://histeria-ai.onrender.com)
+---
+
+### 🌐 Live Deployments
+- **Web Application**: [https://histeria-ai.vercel.app](https://histeria-ai.vercel.app)
+- **Production API**: [https://histeria-ai.onrender.com](https://histeria-ai.onrender.com)
+- **API Health Telemetry**: [https://histeria-ai.onrender.com/](https://histeria-ai.onrender.com/)
 
 ---
 
 ## 🌟 Overview
 
-**Histeria-AI** is an advanced autonomous research agent designed to perform deep, multi-step inquiries, verify real-time web facts, synthesize evidence-backed conclusions, and deliver structured, citation-rich research dossiers through a responsive cyber-retro UI.
+**Histeria-AI** is a production-grade autonomous research agent engineered to conduct multi-step web investigations, cross-examine real-time data, synthesize evidence-backed conclusions, and return strictly structured, citation-grounded research dossiers.
 
-Unlike typical chatbots that hallucinate or provide surface-level static answers, Histeria-AI executes an iterative **Action $\rightarrow$ Observation $\rightarrow$ Reflection** loop, querying the live web, extracting readable DOM content, cross-verifying sources, maintaining conversation state via thread checkpointing, and outputting validated JSON reports formatted into executive summaries.
+Unlike standard conversational chatbots that generate hallucinated or static responses, Histeria-AI operates on an autonomous **Action $\rightarrow$ Observation $\rightarrow$ Reflection** loop. It dynamically decides which tools to invoke, extracts clean document content from deep web pages, maintains multi-turn conversation states via LangGraph thread checkpointing, and streams real-time execution telemetry to a neo-brutalist cyber-retro frontend.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ System Architecture
 
 ```
-                    ┌────────────────────────┐
-                    │      React Client      │
-                    │   (Vite + Tailwind)    │
-                    └───────────┬────────────┘
-                                │ SSE Stream (/query)
-                                ▼
-                    ┌────────────────────────┐
-                    │     FastAPI Server     │
-                    │  (Async Event Engine)  │
-                    └───────────┬────────────┘
-                                │
-                                ▼
-                    ┌────────────────────────┐
-                    │   LangGraph / Agent    │ ◄───► [ InMemorySaver ]
-                    │      (ReAct Loop)      │       (Thread State)
-                    └───────────┬────────────┘
-                                │
-               ┌────────────────┴────────────────┐
-               ▼                                 ▼
-   ┌───────────────────────┐         ┌───────────────────────┐
-   │     Groq LLM Engine   │         │     Agent Tools       │
-   │ (ChatGroq /           │         │ • Tavily Web Search   │
-   │  openai/gpt-oss-120b) │         │ • URL Data Scraper    │
-   └───────────┬───────────┘         └───────────────────────┘
-               │
-               ▼
-   ┌───────────────────────┐
-   │ Structured Formatter  │
-   │ (Pydantic Schema JSON)│
-   └───────────────────────┘
+                    ┌─────────────────────────────────┐
+                    │       React Neo-Client          │
+                    │   (Vite + Tailwind + SSE)       │
+                    └───────────────┬─────────────────┘
+                                    │ SSE Stream (/query)
+                                    ▼
+                    ┌─────────────────────────────────┐
+                    │         FastAPI Engine          │
+                    │     (Async Event Pipeline)      │
+                    └───────────────┬─────────────────┘
+                                    │
+                                    ▼
+                    ┌─────────────────────────────────┐
+                    │      1. Intent Classifier       │
+                    │  (Complexity & Tool Routing)    │
+                    └───────────────┬─────────────────┘
+                                    │
+                     ┌──────────────┴──────────────┐
+                     ▼                             ▼
+        [ Direct Synthesis Path ]      [ ReAct Research Agent ]
+        (Conversational / Creative)     (LangGraph Iterative Loop)
+                     │                             │
+                     │                 ┌───────────┴───────────┐
+                     │                 ▼                       ▼
+                     │       ┌──────────────────┐    ┌──────────────────┐
+                     │       │  Tavily Search   │    │ BeautifulSoup4   │
+                     │       │  (Web Discovery) │    │ (Deep DOM Scrape)│
+                     │       └──────────────────┘    └──────────────────┘
+                     │                             │
+                     └──────────────┬──────────────┘
+                                    │
+                                    ▼
+                    ┌─────────────────────────────────┐
+                    │      LangGraph Checkpointer     │
+                    │   (Thread Conversation State)   │
+                    └───────────────┬─────────────────┘
+                                    │
+                                    ▼
+                    ┌─────────────────────────────────┐
+                    │    Structured JSON Synthesizer  │
+                    │    (Strict Pydantic Schema)     │
+                    └───────────────┬─────────────────┘
+                                    │
+                                    ▼
+                    ┌─────────────────────────────────┐
+                    │     Final Research Dossier      │
+                    │  (Answer, Points, Sources, Lim) │
+                    └─────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Key Features
+## ⚡ Core Capabilities
 
-- **Autonomous ReAct Agent Loop**: Iteratively selects tools, executes actions, analyzes observations, and decides whether further evidence is required before stopping.
-- **Real-Time Live Web Intelligence**: Integrated with Tavily Web Search to extract top ranked, high-relevance web references.
-- **Deep Webpage Data Extractor**: Custom HTML parser using `BeautifulSoup` that strips scripts/styles and extracts up to 12,000 characters of clean readable text from targeted URLs.
-- **Structured Pydantic Reports**: Guaranteed output structure featuring:
-  - Direct executive answer
-  - Key supporting points
-  - Granular sources with titles, URLs, and contextual relevance
-  - Transparent research limitations & unresolved uncertainties
-- **Server-Sent Events (SSE) Streaming**: Low-latency, real-time node state telemetry (`Research started`, `Researching`, `Using research tools`, `Formatting report`).
-- **Thread-Aware State Checkpointing**: LangGraph `InMemorySaver` enables continuous conversation history and context-aware follow-up queries.
-- **Retro-Cyber Neo-Brutalist UI**: Modern frontend built with React, Vite, Lucide icons, canvas-confetti, live backend health check monitoring, and query history caching.
+### 🧠 Autonomous ReAct Agent Loop
+- Implements an iterative reasoning pattern that dynamically decides next actions based on live observations.
+- Supports variable recursion depth dynamically scaled according to query complexity (`simple: 25`, `moderate: 50`, `complex: 100` steps).
+- Self-terminates once sufficient verifiable evidence is collected, avoiding redundant tool execution.
+
+### 🌐 Multi-Source Real-Time Web Intelligence
+- **Tavily Web Search**: Discovers up-to-date sources, high-ranking pages, and domain-filtered web data.
+- **Deep Webpage Data Extractor**: Custom HTML parser using `BeautifulSoup` that strips boilerplate, scripts, and stylesheets to extract up to 12,000 characters of clean readable text from targeted URLs.
+- Graceful error handling and safety fallbacks for timeouts, 403/404 HTTP errors, and malformed HTML responses.
+
+### 🎯 Adaptive Query Classification & Routing
+- Evaluates user input into five distinct intent categories: `factual`, `research`, `comparison`, `creative`, and `conversational`.
+- Bypasses unnecessary web scraping for purely creative or conversational queries to ensure sub-second response times.
+- Formulates a targeted `research_directive` to guide the downstream research agent.
+
+### 🔒 Strictly Structured Pydantic Output
+- Employs bounded JSON mode to guarantee responses strictly adhere to the `ResponseFormat` schema:
+  - **`answer`**: Direct, comprehensive executive synthesis answering the prompt.
+  - **`key_points`**: Supporting arguments, critical facts, and analytical takeaways.
+  - **`sources`**: Transparent citation list with source titles, verified URLs, and contextual relevance.
+  - **`limitations`**: Explicit accounting of data boundaries, knowledge gaps, and potential ambiguities.
+
+### 📡 Server-Sent Events (SSE) Live Telemetry
+- Emits real-time state transitions directly to the client:
+  - `Classifying query...`
+  - `Executing direct synthesis...`
+  - `Researching...`
+  - `Using research tools: tavily_search / get_data_from_url`
+  - `Synthesizing and formatting structured report...`
+- Delivers an interactive, low-latency research experience.
+
+### 💾 Conversational Thread Memory
+- Uses LangGraph thread checkpointing (`InMemorySaver`) paired with unique `thread_id` identifiers.
+- Preserves context across multi-turn inquiries, enabling deep follow-up questions without losing prior research context.
+
+### 🎨 Cyber-Retro Neo-Brutalist Interface
+- Custom-crafted frontend built with React, Vite, and Tailwind CSS.
+- Features real-time SSE stream parsing, Markdown rendering with interactive citation badges, backend health monitoring, and local query history caching.
 
 ---
 
-## 📊 Current Implementation Status
+## 📋 Structured Output Specification
 
-Here is the progress mapping against our core engineering milestones:
+Every research query produces a strictly validated JSON structure:
 
+```json
+{
+  "answer": "Anthropic announced Claude 3.5 Sonnet on June 20, 2024, setting industry-leading benchmarks in graduate-level reasoning and coding proficiency...",
+  "key_points": [
+    "Operates at 2x the speed of Claude 3 Opus with cost parity to previous Sonnet tiers.",
+    "Introduced 'Artifacts', enabling real-time code execution and visual workspaces.",
+    "Achieved 92.0% on HumanEval coding benchmark and 59.4% on GPQA Diamond reasoning."
+  ],
+  "sources": [
+    {
+      "title": "Anthropic - Claude 3.5 Sonnet Announcement",
+      "url": "https://www.anthropic.com/news/claude-3-5-sonnet",
+      "relevance": "Official announcement details, performance benchmarks, and pricing architecture."
+    }
+  ],
+  "limitations": [
+    "Real-time enterprise pricing may vary based on API token volume tier."
+  ]
+}
 ```
-[████████████████████████████░░░░░░░░░░] 60% Overall Progress
+
+---
+
+## 🔌 API Reference
+
+### Health Check & Status
+```http
+GET /
+```
+Returns system health, backend readiness, verified credentials, and active model configurations.
+
+**Response `200 OK`**:
+```json
+{
+  "status": "healthy",
+  "service": "Histeria-AI Backend",
+  "version": "1.0.0",
+  "groq_configured": true,
+  "tavily_configured": true,
+  "models": {
+    "default": "openai/gpt-oss-120b",
+    "classifier": "openai/gpt-oss-20b",
+    "researcher": "openai/gpt-oss-120b",
+    "synthesizer": "openai/gpt-oss-20b"
+  }
+}
 ```
 
-| Component | Status | Details |
-| :--- | :---: | :--- |
-| **Custom Tools Implementation** | ✅ Complete | Tavily Search tool & BeautifulSoup URL extractor with schema validation. |
-| **LangChain ReAct Execution** | ✅ Complete | Action $\rightarrow$ observation $\rightarrow$ next-action loop with `create_agent`. |
-| **Groq LLM Integration** | ✅ Complete | Fast inference using ChatGroq models (`openai/gpt-oss-120b`). |
-| **Strict Pydantic Output** | ✅ Complete | JSON-mode bounded response with `answer`, `key_points`, `sources`, `limitations`. |
-| **Streaming SSE Server** | ✅ Complete | FastAPI streaming endpoint with node-level progress updates. |
-| **Interactive Frontend** | ✅ Complete | React + Vite UI with real-time SSE parsing, health monitoring & chat memory. |
-| **Thread Checkpointing** | 🟡 In Progress | `InMemorySaver` integrated; persistent DB storage (SQLAlchemy) planned. |
-| **Citation Verification & Cross-Checking** | 🟡 In Progress | Grounding prompt in place; automated citation verification suite pending. |
-| **Human-in-the-Loop Clarification** | ⚪ Roadmap | Interactive clarification when queries are ambiguous. |
-| **Evaluation Benchmark** | ⚪ Roadmap | 20–30 task benchmark suite for accuracy & tool selection metrics. |
+---
+
+### Research Query (Streaming)
+```http
+POST /query
+Content-Type: application/json
+```
+
+**Request Body**:
+```json
+{
+  "query": "Compare state-of-the-art open-weights LLMs released in Q4 2024",
+  "thread_id": "optional-uuid-session-identifier"
+}
+```
+
+**Response**: `text/event-stream`
+```
+event: status
+data: {"step": "Classifying query..."}
+
+event: classification
+data: {"intent": "comparison", "complexity": "complex", "needs_tools": true, ...}
+
+event: status
+data: {"step": "Using research tools: tavily_search"}
+
+event: status
+data: {"step": "Synthesizing and formatting structured report..."}
+
+event: result
+data: {"answer": "...", "key_points": [...], "sources": [...], "limitations": [...]}
+
+event: done
+data: {"status": "complete"}
+```
 
 ---
 
-## 🗺️ Project Roadmap
-
-The roadmap follows a 4-week incremental progression from core tool-using agent to an evaluated, production-grade autonomous research system.
-
-![Project Roadmap](backend/proj-roadmap.png)
-
-### 📍 Week 1: Build a Working Tool-Using Agent *(Completed ✅)*
-- [x] Implement custom tools (`search_tool`, `get_data_from_url`).
-- [x] Integrate LangChain's tool-calling capabilities.
-- [x] Build the action $\rightarrow$ observation $\rightarrow$ next-action loop.
-- [x] Set maximum iteration limit and safety constraints.
-- [x] Inspect exact arguments and results of each tool call via live telemetry.
-> **Milestone Achieved**: The agent autonomously solves multi-step research tasks without a rigid, hardcoded sequence of tool calls.
-
----
-
-### 📍 Week 2: Make the Agent Robust *(Currently Active 🟡)*
-- [x] Add structured state and a structured research plan schema.
-- [x] Implement tool failure resilience and safe URL validation.
-- [x] Track exact sources, titles, and citation relevance.
-- [x] Add evidence verification guidelines and strict stopping conditions in system prompts.
-- [ ] Implement automated contradiction detection between divergent sources.
-- [ ] Stress-test edge queries (vague user intent, missing data, conflicting claims).
-> **Milestone Goal**: The agent consistently knows when to deepen research and when sufficient evidence has been acquired to stop.
-
----
-
-### 📍 Week 3: Add State Persistence & User Interaction *(Next Up 📅)*
-- [ ] **Persistent Storage**: Transition from in-memory checkpointer to persistent database storage (SQLAlchemy / PostgreSQL / Qdrant).
-- [ ] **Interrupt & Resume**: Support long-running research tasks with pause, resume, and checkpoint restore.
-- [ ] **Interactive Clarification**: Allow the agent to halt and ask the user for clarification when prompts are ambiguous or multi-faceted.
-- [ ] **Human-in-the-Loop (HITL)**: Require user confirmation before executing consequential or compute-heavy actions.
-- [ ] **Observability & Telemetry**: Log granular tool traces, token usage, cost analytics, and step-by-step latency.
-> **Milestone Goal**: The agent can recover seamlessly from interruptions and transparently explain its reasoning process.
-
----
-
-### 📍 Week 4: Evaluate & Prepare for the Next Framework *(Future 🎯)*
-- [ ] **Benchmark Dataset**: Curate a standardized evaluation dataset of 20–30 diverse research tasks.
-- [ ] **Tool-Selection Benchmarks**: Measure tool-selection accuracy, precision, and task completion rate.
-- [ ] **Hallucination & Citation Auditing**: Verify citation correctness, URL validity, and unsupported claim percentage.
-- [ ] **A/B Architecture Comparison**: Benchmark the planned verified agent against a naive zero-shot baseline agent.
-- [ ] **Documentation & Post-Mortem**: Document edge-case failure modes, architectural trade-offs, and scalability bottlenecks.
-> **Milestone Goal**: Demonstrate measurable performance and empirical verification of design choices.
-
----
-
-## 📂 Repository Structure
+## 🗂️ Project Structure
 
 ```
 Histeria-Ai/
 ├── backend/
-│   ├── controllers.py        # Stream orchestration, agent execution & JSON formatting
-│   ├── main.py               # FastAPI application entrypoint & routing
-│   ├── models.py             # ChatGroq LLM model instantiation
-│   ├── prompts.py            # ReAct instructions & JSON formatter system prompts
+│   ├── controllers.py        # Stream orchestration, agent execution & JSON synthesis
+│   ├── main.py               # FastAPI application entrypoint, CORS & routing
+│   ├── models.py             # ChatGroq LLM model configurations & fallbacks
+│   ├── prompts.py            # System prompts for ReAct agent, classifier & formatter
 │   ├── schemas.py            # Pydantic schemas (Query, Source, ResponseFormat)
-│   ├── tools.py              # Custom tools (Tavily search & URL scraper)
-│   ├── proj-roadmap.png      # Roadmap milestone diagram
-│   ├── requirements.txt      # Backend Python dependencies
-│   └── .env                  # API keys and secrets (GROQ_API_KEY, TAVILY_API_KEY)
+│   ├── tools.py              # Custom tools: Tavily Search & BeautifulSoup scraper
+│   ├── requirements.txt      # Python backend dependencies
+│   ├── .env.example          # Sample environment variables
+│   └── Procfile              # Render production start command
 │
-└── frontend/
-    ├── public/               # Public assets and icons
-    ├── src/
-    │   ├── components/       # Header, Sidebar, MessageBubble, NeoComponents
-    │   ├── services/         # api.js (SSE event source handler & health checks)
-    │   ├── App.jsx           # Main application chat container & state management
-    │   ├── index.css         # Base styles & Tailwind directives
-    │   └── neo-style.css     # Cyber-retro neo-brutalist styling
-    ├── package.json          # Frontend packages & scripts
-    └── vite.config.js        # Vite configuration
+├── frontend/
+│   ├── public/               # Static icons & brand assets
+│   ├── src/
+│   │   ├── components/       # Header, Sidebar, MessageBubble, NeoComponents
+│   │   ├── services/         # SSE streaming client & API health verification
+│   │   ├── App.jsx           # Master application container & state orchestration
+│   │   ├── index.css         # Tailwind base styles
+│   │   └── neo-style.css     # Neo-brutalist theme & animations
+│   ├── package.json          # Node dependencies & build scripts
+│   └── vite.config.js        # Vite build configuration
+│
+├── .gitignore                # Global git ignore configuration
+├── Procfile                  # Platform deployment configuration
+└── README.md                 # Project documentation
 ```
 
 ---
 
-## 🛠️ Quickstart Guide
+## 🛠️ Getting Started
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+ & npm
-- [Groq API Key](https://console.groq.com)
-- [Tavily Search API Key](https://tavily.com)
+- **Python**: 3.10 or higher
+- **Node.js**: 18.x or higher & npm
+- **API Keys**:
+  - [Groq Console](https://console.groq.com/keys) (Ultra-fast LLM inference)
+  - [Tavily](https://tavily.com) (Live web search engine)
+
+---
 
 ### 1. Backend Setup
 
 ```bash
+# Navigate to the backend directory
 cd backend
 
-# Create and activate virtual environment
+# Create and activate a virtual environment
 python -m venv venv
-# Windows:
+# On Windows:
 venv\Scripts\activate
-# Linux/macOS:
+# On macOS / Linux:
 # source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Configure environment variables
-# Copy .env.example to .env
 cp .env.example .env
-
-# Edit .env and supply your API keys:
-# GROQ_API_KEY=gsk_...
-# TAVILY_API_KEY=tvly-...
-# ALLOWED_ORIGINS=https://histeria-ai.vercel.app,https://histeria-ai.onrender.com,http://localhost:5173
-# (Optional) GROQ_MODEL=openai/gpt-oss-120b
-
-# Start FastAPI server (Local)
-uvicorn main:app --reload --port 8000
-
-# Production Start Command (Render):
-# uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
-Local API server runs at `http://localhost:8000`. Deployed production API runs at `https://histeria-ai.onrender.com`.
-Verify health and status at `https://histeria-ai.onrender.com/`.
+
+Edit `backend/.env` with your API credentials:
+```env
+GROQ_API_KEY=gsk_your_groq_api_key_here
+TAVILY_API_KEY=tvly-your_tavily_api_key_here
+ALLOWED_ORIGINS=https://histeria-ai.vercel.app,http://localhost:5173
+```
+
+Start the FastAPI development server:
+```bash
+uvicorn main:app --reload --port 8000
+```
+API runs locally at `http://localhost:8000`. You can verify operational status at `http://localhost:8000/`.
+
+---
 
 ### 2. Frontend Setup
 
 ```bash
+# Open a new terminal and navigate to frontend
 cd frontend
 
-# Install npm packages
+# Install dependencies
 npm install
 
 # Configure environment variables
-# Copy .env.example to .env
 cp .env.example .env
-# Set VITE_API_BASE_URL to your backend URL (e.g. http://localhost:8000 or deployed endpoint)
+```
 
-# Start Vite development server
+Ensure `frontend/.env` points to your backend instance:
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Launch the Vite development server:
+```bash
 npm run dev
 ```
-Client runs at `http://localhost:5173`. For production deployment (e.g., Vercel), set `VITE_API_BASE_URL` in your hosting dashboard.
+The client will be running at `http://localhost:5173`.
 
 ---
 
-## 🔧 Troubleshooting & Common Errors
+## ⚙️ Environment Variables Reference
 
-| Error | Root Cause | Solution |
+| Variable | Scope | Required | Default | Description |
+| :--- | :---: | :---: | :---: | :--- |
+| `GROQ_API_KEY` | Backend | **Yes** | — | API key for high-speed Groq LLM inference. |
+| `TAVILY_API_KEY` | Backend | **Yes** | — | API key for real-time web discovery & page indexing. |
+| `GROQ_MODEL` | Backend | No | `openai/gpt-oss-120b` | Base model for research synthesis. |
+| `GROQ_CLASSIFIER_MODEL` | Backend | No | `openai/gpt-oss-20b` | High-speed model for query classification. |
+| `GROQ_RESEARCH_MODEL` | Backend | No | `openai/gpt-oss-120b` | High-capacity model for ReAct tool execution. |
+| `GROQ_SYNTHESIZER_MODEL` | Backend | No | `openai/gpt-oss-20b` | Model executing structured JSON formatting. |
+| `ALLOWED_ORIGINS` | Backend | No | `https://histeria-ai.vercel.app,...` | Comma-separated origins for CORS policies. |
+| `VITE_API_BASE_URL` | Frontend | No | `http://localhost:8000` | Backend API base URL consumed by the web client. |
+
+---
+
+## 🚀 Production Deployment
+
+### Backend (Render)
+- **Environment**: Python 3.10+
+- **Root Directory**: `backend`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**: Add `GROQ_API_KEY`, `TAVILY_API_KEY`, and `ALLOWED_ORIGINS` in the Render Environment tab.
+
+### Frontend (Vercel)
+- **Framework Preset**: Vite
+- **Root Directory**: `frontend`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**: Set `VITE_API_BASE_URL=https://histeria-ai.onrender.com`.
+
+---
+
+## 🔧 Diagnostics & Troubleshooting
+
+| Issue | Root Cause | Solution |
 | :--- | :--- | :--- |
-| **`404 - The model ... does not exist`** | The model ID configured is retired or not accessible on your Groq tier (e.g. `llama-3.3-70b-versatile`). | Set `GROQ_MODEL=openai/gpt-oss-120b` or `openai/gpt-oss-20b` in `backend/.env`. Check active models at [Groq Models](https://console.groq.com/docs/models). |
-| **`401 - Invalid API Key`** | Missing or incorrect `GROQ_API_KEY`. | Verify your key at [Groq Console Keys](https://console.groq.com/keys) and update `backend/.env`. |
-| **`429 - Rate Limit Exceeded`** | Exceeded TPM (tokens per minute) limit on free Groq tier. | Wait 30–60 seconds, or switch to the faster/lighter `GROQ_MODEL=openai/gpt-oss-20b` in `backend/.env`. |
-| **`Tavily Search Error`** | Missing or invalid `TAVILY_API_KEY`. | Obtain a free key at [Tavily](https://tavily.com) and add `TAVILY_API_KEY=...` to `backend/.env`. |
-| **`Missing GROQ_API_KEY` on boot** | Server started without `.env` configured. | Copy `.env.example` to `backend/.env` and add your keys. |
+| **`404 - Model not found`** | Specified Groq model is retired or unsupported on your tier. | Use `openai/gpt-oss-120b` or `openai/gpt-oss-20b` in `backend/.env`. Refer to [Groq Supported Models](https://console.groq.com/docs/models). |
+| **`401 - Unauthorized`** | Missing or incorrect `GROQ_API_KEY`. | Verify the key in the [Groq Console](https://console.groq.com/keys) and update `backend/.env`. |
+| **`429 - Rate Limit Exceeded`** | Exceeded TPM limit on free Groq tier. | Configure `GROQ_MODEL=openai/gpt-oss-20b` in `backend/.env` for a lighter, faster token footprint. |
+| **`Tavily Search Error`** | Invalid or missing `TAVILY_API_KEY`. | Obtain a free key at [Tavily](https://tavily.com) and add it to `backend/.env`. |
+| **CORS Network Error** | Frontend URL is not in backend allowed origins. | Append your frontend URL to `ALLOWED_ORIGINS` in `backend/.env`. |
 
 ---
 
-## 🛡️ License
+## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is open-source and licensed under the [MIT License](LICENSE).
