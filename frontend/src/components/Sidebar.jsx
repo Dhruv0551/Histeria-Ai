@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Shield, Zap, Search, Activity, Cpu } from 'lucide-react';
+import { Terminal, Zap, Search, Activity, Cpu } from 'lucide-react';
 
 export function Sidebar({ backendOnline, messageCount, onSelectPrompt }) {
   const samplePrompts = [

@@ -62,8 +62,8 @@ export async function streamAgentQuery(query, { onToken, onResult, onStatus, onD
             } else if (parsed.type === 'done') {
               onDone?.();
             }
-          } catch (e) {
-            console.warn('Failed to parse SSE line:', jsonStr, e);
+          } catch (err) {
+            console.warn('Failed to parse SSE line:', jsonStr, err);
           }
         }
       }
@@ -78,7 +78,7 @@ export async function streamAgentQuery(query, { onToken, onResult, onStatus, onD
         if (parsed.type === 'status') onStatus?.(parsed.content);
         if (parsed.type === 'error') onError?.(parsed.content);
         if (parsed.type === 'done') onDone?.();
-      } catch (e) {
+      } catch {
       }
     }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { Send, Trash2, ArrowDown, Bot, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
+import { Send, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { MessageBubble } from './components/MessageBubble';
@@ -22,7 +22,6 @@ export default function App() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [backendOnline, setBackendOnline] = useState(false);
   const [activeNode, setActiveNode] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
 
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -30,11 +29,6 @@ export default function App() {
   const checkHealth = async () => {
     const res = await checkBackendHealth();
     setBackendOnline(res.ok);
-    if (!res.ok) {
-      setErrorMessage(`Backend is offline. Unable to reach ${API_BASE_URL}`);
-    } else {
-      setErrorMessage(null);
-    }
   };
 
   useEffect(() => {
@@ -79,7 +73,6 @@ export default function App() {
     setMessages(newMessages);
     setInputQuery('');
     setIsStreaming(true);
-    setErrorMessage(null);
     setActiveNode('Initializing LangGraph Agent...');
 
     try {
@@ -123,7 +116,11 @@ export default function App() {
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMsgId
-                ? { ...msg, content: formattedContent }
+                ? {
+                    ...msg,
+                    content: formattedContent,
+                    report: typeof result === 'object' && result !== null ? result : null,
+                  }
                 : msg
             )
           );
@@ -151,14 +148,13 @@ export default function App() {
               origin: { y: 0.9 },
               colors: ['#ffee00', '#ff5277', '#00f0ff', '#10e060'],
             });
-          } catch (e) {
+          } catch {
           }
         },
         onError: (err) => {
           setIsStreaming(false);
           setActiveNode(null);
           const errorText = typeof err === 'string' && err.trim().length > 0 ? err : 'Execution failed';
-          setErrorMessage(errorText);
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMsgId
@@ -175,7 +171,6 @@ export default function App() {
       setIsStreaming(false);
       setActiveNode(null);
       const errorMsg = err?.message || 'Failed to communicate with backend server';
-      setErrorMessage(errorMsg);
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMsgId

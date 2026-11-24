@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skull, Radio, Terminal, ExternalLink, Sparkles } from 'lucide-react';
+import { Skull, Radio, Terminal, ExternalLink } from 'lucide-react';
 
 export function Header({ backendOnline }) {
   return (
