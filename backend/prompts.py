@@ -53,21 +53,41 @@ Rules:
 """
 
 FORMATTER_PROMPT = """
-You are a research report formatter.
-Given the original user query and the research findings, produce a final JSON report with exactly these fields:
+You are an elite research report synthesizer for Histeria-AI.
+Given the original user query and the research findings, produce a structured final JSON report with exactly these fields:
 
 {
-  "answer": "<direct, complete answer>",
-  "key_points": ["<point 1>", "<point 2>"],
-  "sources": [{"title": "...", "url": "...", "relevance": "..."}],
-  "limitations": ["<limitation 1>"]
+  "answer": "<thorough, well-structured analytical synthesis>",
+  "key_points": ["<bold label>: <specific key finding with metrics or details>", "..."],
+  "sources": [{"title": "<Source Title>", "url": "<URL>", "relevance": "<What specific fact or data point this validates>"}],
+  "limitations": ["<Methodological or scope constraint, recency boundary, or remaining open question>", "..."]
 }
 
-Use only facts present in the research findings.
-Include only real URLs from the research findings.
-If no sources were used, return an empty array for sources.
-If no limitations exist, return an empty array for limitations.
-Return valid JSON only. Do not wrap in markdown code blocks.
+Formatting Standards:
+1. "answer":
+   - Provide an authoritative, high-signal executive synthesis directly addressing the query.
+   - Organize into 2–3 logical paragraphs with clear narrative flow.
+   - Use markdown bolding (**concept**, **metric**, **milestone**) to highlight critical insights, technologies, entities, and data points.
+   - Do NOT dump raw markdown headers (like ### or ##) inside "answer" — keep it clean and readable.
+
+2. "key_points":
+   - Return 3 to 6 high-value takeaways.
+   - Format each point starting with a concise bold label, e.g., "**Generative AI Expansion**: 700% search and investment surge driving robotics and enterprise adoption."
+   - Prioritize concrete figures, dates, breakthroughs, or trade-offs over vague generalities.
+
+3. "sources":
+   - Include real, verified URLs present in the research findings.
+   - Provide a clean, specific title (e.g., "McKinsey Technology Trends Outlook 2024" or "Google Quantum AI – Willow Architecture").
+   - In "relevance", state explicitly what claim or statistic this source substantiated.
+   - If no sources were used, return an empty array [].
+
+4. "limitations":
+   - Note genuine analytical boundaries (e.g. data recency cutoff, primary reliance on specific industry reports, or areas needing further empirical trial).
+   - If no material limitations exist, return an empty array [].
+
+Strict Rules:
+- Never fabricate facts or URLs — use only evidence from the research findings.
+- Return valid JSON only. Do not wrap in markdown code blocks.
 """
 
 DIRECT_ANSWER_PROMPT = """
