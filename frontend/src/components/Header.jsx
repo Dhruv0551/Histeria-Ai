@@ -1,7 +1,13 @@
 import React from 'react';
-import { Skull, Radio, Terminal, ExternalLink } from 'lucide-react';
+import { Skull, Radio, BookOpen, Terminal, Activity } from 'lucide-react';
 
-export function Header({ backendOnline }) {
+export function Header({
+  backendOnline,
+  currentView = 'console',
+  onNavigate,
+  onTriggerHealthcheck,
+  latencyMs,
+}) {
   return (
     <header style={{ marginBottom: '1.25rem', width: '100%' }}>
       <div
@@ -36,9 +42,20 @@ export function Header({ backendOnline }) {
           alignItems: 'center',
           padding: '1rem 1.5rem',
           marginTop: '0.75rem',
+          flexWrap: 'wrap',
+          gap: '1rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+        <div
+          onClick={() => onNavigate?.('console')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.8rem',
+            cursor: 'pointer',
+          }}
+          title="Return to Mission Console"
+        >
           <div
             className="neo-box bg-neo-yellow"
             style={{
@@ -79,31 +96,52 @@ export function Header({ backendOnline }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => onTriggerHealthcheck?.()}
             className={`neo-badge ${backendOnline ? 'bg-neo-lime' : 'bg-neo-pink'}`}
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
-          >
-            <Radio size={14} className={backendOnline ? 'pulse-dot' : ''} />
-            <span>PORT 8000: {backendOnline ? 'CONNECTED' : 'DISCONNECTED'}</span>
-          </div>
-
-          <a
-            href="http://localhost:8000/docs"
-            target="_blank"
-            rel="noreferrer"
-            className="neo-btn bg-neo-cyan"
             style={{
               padding: '0.4rem 0.8rem',
               fontSize: '0.75rem',
-              textDecoration: 'none',
-              color: '#0d0d0d',
+              cursor: 'pointer',
+              border: '2px solid #0d0d0d',
             }}
+            title="Click to probe Render healthcheck now"
           >
-            <Terminal size={14} />
-            <span>FASTAPI DOCS</span>
-            <ExternalLink size={12} />
-          </a>
+            <Radio size={14} className={backendOnline ? 'pulse-dot' : ''} />
+            <span>RENDER API: {backendOnline ? 'ONLINE' : 'CONNECTING / SLEEPING'}</span>
+            {latencyMs != null && backendOnline && (
+              <span style={{ opacity: 0.8, fontSize: '0.7rem' }}>({latencyMs}ms)</span>
+            )}
+          </button>
+
+          {currentView === 'docs' ? (
+            <button
+              onClick={() => onNavigate?.('console')}
+              className="neo-btn bg-neo-yellow"
+              style={{
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.75rem',
+                color: '#0d0d0d',
+              }}
+            >
+              <Terminal size={14} />
+              <span>MISSION CONSOLE</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onNavigate?.('docs')}
+              className="neo-btn bg-neo-cyan"
+              style={{
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.75rem',
+                color: '#0d0d0d',
+              }}
+            >
+              <BookOpen size={14} />
+              <span>CUSTOM DOCS PAGE</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
