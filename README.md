@@ -15,6 +15,7 @@
 
 ### 🌐 Live Deployments
 - **Web Application**: [https://histeria-ai.vercel.app](https://histeria-ai.vercel.app)
+- **Custom System & API Docs**: [https://histeria-ai.vercel.app/#/docs](https://histeria-ai.vercel.app/#/docs)
 - **Production API**: [https://histeria-ai.onrender.com](https://histeria-ai.onrender.com)
 - **API Health Telemetry**: [https://histeria-ai.onrender.com/](https://histeria-ai.onrender.com/)
 
