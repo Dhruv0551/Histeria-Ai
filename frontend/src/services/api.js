@@ -1,18 +1,45 @@
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  import.meta.env.VITE_API_BASE_URL || 'https://histeria-ai.onrender.com'
 ).replace(/\/+$/, '');
 
-export async function checkBackendHealth() {
+export async function checkBackendHealth(targetUrl = API_BASE_URL) {
+  const startTime = Date.now();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   try {
-    const res = await fetch(`${API_BASE_URL}/`, {
+    const cleanUrl = (targetUrl || API_BASE_URL).replace(/\/+$/, '');
+    const res = await fetch(`${cleanUrl}/`, {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    clearTimeout(timeoutId);
+    const latencyMs = Date.now() - startTime;
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText || 'Health check failed'}`);
+    }
     const data = await res.json();
-    return { ok: true, data };
+    return {
+      ok: true,
+      status: res.status,
+      latencyMs,
+      data,
+      checkedAt: new Date().toISOString(),
+      url: cleanUrl,
+    };
   } catch (err) {
-    return { ok: false, error: err.message };
+    clearTimeout(timeoutId);
+    const latencyMs = Date.now() - startTime;
+    const isTimeout = err.name === 'AbortError';
+    return {
+      ok: false,
+      status: isTimeout ? 408 : 0,
+      latencyMs,
+      error: isTimeout ? 'Request timed out after 15s (Render instance may be waking from sleep)' : err.message,
+      checkedAt: new Date().toISOString(),
+      url: targetUrl || API_BASE_URL,
+    };
   }
 }
 
