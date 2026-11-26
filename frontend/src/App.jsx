@@ -4,11 +4,17 @@ import { Send, Trash2, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { MessageBubble } from './components/MessageBubble';
+import { DocsPage } from './components/DocsPage';
 import { checkBackendHealth, streamAgentQuery, API_BASE_URL } from './services/api';
 import './index.css';
 import './neo-style.css';
 
 export default function App() {
+  const getInitialView = () => (window.location.hash === '#/docs' ? 'docs' : 'console');
+  const [currentView, setCurrentView] = useState(getInitialView);
+  const [healthData, setHealthData] = useState(null);
+  const [latencyMs, setLatencyMs] = useState(null);
+
   const [messages, setMessages] = useState([
     {
       id: 'welcome-1',
@@ -29,12 +35,58 @@ export default function App() {
   const checkHealth = async () => {
     const res = await checkBackendHealth();
     setBackendOnline(res.ok);
+    setLatencyMs(res.latencyMs);
+    setHealthData(res);
+    return res;
+  };
+
+  const handleNavigate = (view) => {
+    setCurrentView(view);
+    if (view === 'docs') {
+      window.location.hash = '#/docs';
+    } else {
+      window.location.hash = '#/console';
+    }
   };
 
   useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#/docs') {
+        setCurrentView('docs');
+      } else {
+        setCurrentView('console');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    // Initial healthcheck on mount
     checkHealth();
-    const interval = setInterval(checkHealth, 6000);
-    return () => clearInterval(interval);
+
+    // Periodic healthcheck interval
+    const interval = setInterval(checkHealth, 10000);
+
+    // Hit healthcheck whenever window is focused or tab becomes visible
+    const handleFocus = () => {
+      checkHealth();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkHealth();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const scrollToBottom = () => {
@@ -49,6 +101,9 @@ export default function App() {
     e?.preventDefault();
     const query = inputQuery.trim();
     if (!query || isStreaming) return;
+
+    // Trigger healthcheck on Render whenever query is called
+    checkHealth();
 
     const userMsgId = `user-${Date.now()}`;
     const assistantMsgId = `bot-${Date.now()}`;
@@ -216,227 +271,243 @@ export default function App() {
         flexDirection: 'column',
       }}
     >
-      <Header backendOnline={backendOnline} />
+      <Header
+        backendOnline={backendOnline}
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        onTriggerHealthcheck={checkHealth}
+        latencyMs={latencyMs}
+      />
 
-      {!backendOnline && (
-        <div
-          className="neo-box bg-neo-pink"
-          style={{
-            marginBottom: '1rem',
-            padding: '0.8rem 1.2rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            color: '#fff',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', fontWeight: 800 }}>
-            <AlertTriangle size={22} color="#fff" />
-            <div>
-              <span>BACKEND SERVICE NOT DETECTED AT {API_BASE_URL}</span>
-              <div style={{ fontSize: '0.78rem', opacity: 0.9, marginTop: '2px' }}>
-                Verify backend URL in <code>frontend/.env</code> or start local server
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={checkHealth}
-            className="neo-btn bg-white"
-            style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}
-          >
-            <RefreshCw size={13} /> RETRY LINK
-          </button>
-        </div>
-      )}
-
-      <div
-        style={{
-          display: 'flex',
-          gap: '1.25rem',
-          flex: 1,
-          alignItems: 'stretch',
-          flexDirection: 'row',
-        }}
-      >
-        <Sidebar
+      {currentView === 'docs' ? (
+        <DocsPage
+          onBackToConsole={() => handleNavigate('console')}
           backendOnline={backendOnline}
-          messageCount={messages.filter((m) => m.role === 'user').length}
-          onSelectPrompt={(prompt) => {
-            setInputQuery(prompt);
-            textareaRef.current?.focus();
-          }}
+          initialHealthData={healthData}
         />
-
-        <main
-          className="neo-box-xl bg-white"
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            backgroundColor: '#ffffff',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffee00',
-              borderBottom: '3px solid #0d0d0d',
-              padding: '0.75rem 1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span className="neo-badge bg-black" style={{ color: '#00ff66' }}>
-                STREAM // REACT AGENT
-              </span>
-              <span style={{ fontWeight: 900, fontSize: '0.85rem' }}>
-                MISSION CONSOLE ACTIVE
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              {isStreaming && (
-                <span className="neo-badge bg-neo-pink">
-                  <span className="pulse-dot" /> STREAMING CHUNKS
-                </span>
-              )}
-              <button
-                onClick={handleClearChat}
-                className="neo-btn bg-white"
-                style={{
-                  padding: '0.25rem 0.6rem',
-                  fontSize: '0.7rem',
-                  borderWidth: '2px',
-                  boxShadow: '2px 2px 0px #000',
-                }}
-                title="Clear Chat Logs"
-              >
-                <Trash2 size={13} /> PURGE
-              </button>
-            </div>
-          </div>
-
-          {activeNode && (
+      ) : (
+        <>
+          {!backendOnline && (
             <div
+              className="neo-box bg-neo-pink"
               style={{
-                backgroundColor: '#111',
-                color: '#00f0ff',
-                padding: '0.4rem 1.25rem',
-                borderBottom: '2px solid #0d0d0d',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.75rem',
-                fontWeight: 700,
+                marginBottom: '1rem',
+                padding: '0.8rem 1.2rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
+                justifyContent: 'space-between',
+                color: '#fff',
               }}
             >
-              <span className="pulse-dot" style={{ backgroundColor: '#00f0ff' }} />
-              <span>AGENT TRACE: {activeNode}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', fontWeight: 800 }}>
+                <AlertTriangle size={22} color="#fff" />
+                <div>
+                  <span>BACKEND SERVICE NOT DETECTED AT {API_BASE_URL}</span>
+                  <div style={{ fontSize: '0.78rem', opacity: 0.9, marginTop: '2px' }}>
+                    Render instance may be asleep or starting up. Click retry or visit the Docs page to test telemetry.
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={checkHealth}
+                className="neo-btn bg-white"
+                style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}
+              >
+                <RefreshCw size={13} /> RETRY LINK
+              </button>
             </div>
           )}
 
           <div
             style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '1.5rem',
-              backgroundColor: '#faf8f2',
               display: 'flex',
-              flexDirection: 'column',
-              minHeight: '440px',
-              maxHeight: 'calc(100vh - 340px)',
+              gap: '1.25rem',
+              flex: 1,
+              alignItems: 'stretch',
+              flexDirection: 'row',
             }}
           >
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
-            ))}
-            <div ref={chatEndRef} />
-          </div>
+            <Sidebar
+              backendOnline={backendOnline}
+              messageCount={messages.filter((m) => m.role === 'user').length}
+              onSelectPrompt={(prompt) => {
+                setInputQuery(prompt);
+                textareaRef.current?.focus();
+              }}
+            />
 
-          <footer
-            style={{
-              padding: '1.25rem',
-              borderTop: '3px solid #0d0d0d',
-              backgroundColor: '#ffffff',
-            }}
-          >
-            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.75rem' }}>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <textarea
-                  ref={textareaRef}
-                  value={inputQuery}
-                  onChange={(e) => setInputQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Dispatch query or instruction to the agent (Shift+Enter for newline)..."
-                  rows={2}
-                  disabled={isStreaming}
-                  className="neo-input"
-                  style={{
-                    resize: 'none',
-                    fontWeight: 600,
-                    fontSize: '0.92rem',
-                    lineHeight: 1.4,
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isStreaming || !inputQuery.trim()}
-                className="neo-btn bg-neo-yellow"
-                style={{
-                  padding: '0 1.6rem',
-                  fontSize: '0.95rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.2rem',
-                  minWidth: '120px',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Send size={16} />
-                  <span>TRANSMIT</span>
-                </div>
-                <span
-                  style={{
-                    fontSize: '0.62rem',
-                    fontFamily: 'var(--font-mono)',
-                    fontWeight: 700,
-                    opacity: 0.8,
-                  }}
-                >
-                  [ENTER ↵]
-                </span>
-              </button>
-            </form>
-
-            <div
+            <main
+              className="neo-box-xl bg-white"
               style={{
+                flex: 1,
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '0.6rem',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                color: '#666',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                backgroundColor: '#ffffff',
               }}
             >
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <span className="neo-badge bg-neo-cyan" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
-                  HINT
-                </span>
-                <span>Queries automatically invoke search_tool when current data is required.</span>
+              <div
+                style={{
+                  backgroundColor: '#ffee00',
+                  borderBottom: '3px solid #0d0d0d',
+                  padding: '0.75rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span className="neo-badge bg-black" style={{ color: '#00ff66' }}>
+                    STREAM // REACT AGENT
+                  </span>
+                  <span style={{ fontWeight: 900, fontSize: '0.85rem' }}>
+                    MISSION CONSOLE ACTIVE
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  {isStreaming && (
+                    <span className="neo-badge bg-neo-pink">
+                      <span className="pulse-dot" /> STREAMING CHUNKS
+                    </span>
+                  )}
+                  <button
+                    onClick={handleClearChat}
+                    className="neo-btn bg-white"
+                    style={{
+                      padding: '0.25rem 0.6rem',
+                      fontSize: '0.7rem',
+                      borderWidth: '2px',
+                      boxShadow: '2px 2px 0px #000',
+                    }}
+                    title="Clear Chat Logs"
+                  >
+                    <Trash2 size={13} /> PURGE
+                  </button>
+                </div>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)' }}>
-                VITE + REACT 19 // SSE STREAMING
+
+              {activeNode && (
+                <div
+                  style={{
+                    backgroundColor: '#111',
+                    color: '#00f0ff',
+                    padding: '0.4rem 1.25rem',
+                    borderBottom: '2px solid #0d0d0d',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <span className="pulse-dot" style={{ backgroundColor: '#00f0ff' }} />
+                  <span>AGENT TRACE: {activeNode}</span>
+                </div>
+              )}
+
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '1.5rem',
+                  backgroundColor: '#faf8f2',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: '440px',
+                  maxHeight: 'calc(100vh - 340px)',
+                }}
+              >
+                {messages.map((message) => (
+                  <MessageBubble key={message.id} message={message} />
+                ))}
+                <div ref={chatEndRef} />
               </div>
-            </div>
-          </footer>
-        </main>
-      </div>
+
+              <footer
+                style={{
+                  padding: '1.25rem',
+                  borderTop: '3px solid #0d0d0d',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.75rem' }}>
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    <textarea
+                      ref={textareaRef}
+                      value={inputQuery}
+                      onChange={(e) => setInputQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Dispatch query or instruction to the agent (Shift+Enter for newline)..."
+                      rows={2}
+                      disabled={isStreaming}
+                      className="neo-input"
+                      style={{
+                        resize: 'none',
+                        fontWeight: 600,
+                        fontSize: '0.92rem',
+                        lineHeight: 1.4,
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isStreaming || !inputQuery.trim()}
+                    className="neo-btn bg-neo-yellow"
+                    style={{
+                      padding: '0 1.6rem',
+                      fontSize: '0.95rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.2rem',
+                      minWidth: '120px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Send size={16} />
+                      <span>TRANSMIT</span>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '0.62rem',
+                        fontFamily: 'var(--font-mono)',
+                        fontWeight: 700,
+                        opacity: 0.8,
+                      }}
+                    >
+                      [ENTER ↵]
+                    </span>
+                  </button>
+                </form>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '0.6rem',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: '#666',
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <span className="neo-badge bg-neo-cyan" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
+                      HINT
+                    </span>
+                    <span>Queries automatically invoke search_tool when current data is required.</span>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)' }}>
+                    VITE + REACT 19 // SSE STREAMING
+                  </div>
+                </div>
+              </footer>
+            </main>
+          </div>
+        </>
+      )}
     </div>
   );
 }
